@@ -10,6 +10,7 @@ namespace be {
     DEFINE_NCLASS_META_NAME(TelnetChannelNClass, EventEmitter, "TelnetChannel")
     std::vector<JSCFunctionListEntry> TelnetChannelNClass::methods = {
         JS_CFUNC_DEF("process", 0, TelnetChannelNClass::process),
+        JS_CFUNC_DEF("enableEventOutput", 0, TelnetChannelNClass::enableEventOutput),
     } ;
 
     TelnetChannelNClass::TelnetChannelNClass(JSContext * ctx, JSValue _jsobj)
@@ -70,18 +71,39 @@ namespace be {
         emitSyncFree("output-stream", {
             JS_NewArrayBufferCopy(ctx, (const uint8_t *)data, datalen)
         }) ;
+        
+        // emit output event
+        if(enabledOutputEvent) {
+            emitSyncFree("output", {
+                JS_NewArrayBufferCopy(ctx, (uint8_t *)data, datalen)
+            }) ;
+        }
+
         Console::setChannel(nullptr) ;
     }
 
     void TelnetChannelNClass::send (Package & pkg) {
-        
+        Console::setChannel("serial") ;
+
         size_t len = 0 ;
         uint8_t * data = pkg.toStream(&len) ;
-
-        Console::setChannel("serial") ;
         emitSyncFree("output-stream", {
             JS_NewArrayBuffer(ctx, data, len, freeArrayBuffer, NULL, false)
         }) ;
+
+        // emit output event
+        if(enabledOutputEvent && pkg.head.fields.cmd == Cmd::OUTPUT) {
+            emitSyncFree("output", {
+                JS_NewArrayBufferCopy(ctx, pkg.body(), pkg.body_len)
+            }) ;
+        }
+
         Console::setChannel(nullptr) ;
+    }
+
+    JSValue TelnetChannelNClass::enableEventOutput(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+        THIS_NCLASS(TelnetChannelNClass, self)
+        self->enabledOutputEvent = true ;
+        return JS_UNDEFINED ;
     }
 }

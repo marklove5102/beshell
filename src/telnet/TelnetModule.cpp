@@ -16,6 +16,8 @@ namespace be{
         exportName("ws") ;
         exportName("ble") ;
         exportName("cdc") ;
+        exportName("startLog") ;
+        exportName("stopLog") ;
         
         EXPORT_FUNCTION(enableCrypto) ;
         EXPORT_FUNCTION(disableCrypto) ;

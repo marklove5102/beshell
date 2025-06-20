@@ -7,6 +7,7 @@ New Feature:
 * source 命令可以使用参数
 * telnet.ble
 * telnet 接收数据对称加密
+* telnet.startLog()
 * mg.https/mqtts support client cert/key
 * cdc module
 * cdc telnet
