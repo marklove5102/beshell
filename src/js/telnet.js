@@ -119,6 +119,7 @@ exportValue(telnet, "cdc", {
     let logger = null
     let openedFile = -1
     let storeDir = "/store/log"
+    let writingFilePath = null
     let wroteBytes = 0
     let fileSize = 1024
     let maxFiles = 50
@@ -150,34 +151,25 @@ exportValue(telnet, "cdc", {
         logger = new telnet.TelnetChannel()
         logger.on("output", writeLog)
         logger.enableEventOutput()
-        
-        activeFile()
     }
     exportValue(telnet, "startLog", startLog)
     exportValue(telnet, "stopLog", function stopLog() {
         logger = null
-        if(openedFile>-1) {
-            fs.close(openedFile)
-            openedFile = -1
-        }
     })
     function writeLog (data) {
-        if(openedFile<0){
-            return
+
+        if( !writingFilePath || wroteBytes>fileSize ) {
+            createNewLogFile()
         }
-        if(wroteBytes>fileSize) {
-            fs.close(openedFile)
-            openedFile = -1
-            wroteBytes = 0
-            activeFile()
+
+        let content = `[${new Date().toISOString().replace("T", ' ').slice(0,19)}] ${data.asString()}`
+        if(content[content.length-1] != '\n') {
+            content += '\n'
         }
-        wroteBytes+= fs.write(openedFile, `[${new Date().toISOString().replace("T", ' ').slice(0,19)}] `)
-        wroteBytes+= fs.write(openedFile, data)
+        fs.writeFileSync(writingFilePath, content, true)
+        wroteBytes+= content.length
     }
-    function activeFile() {
-        if(openedFile>-1) {
-            return openedFile
-        }
+    function createNewLogFile() {
         let logFiles = findLastFile(storeDir)
         if (logFiles.length > maxFiles) {
             logFiles.slice(0, logFiles.length - maxFiles).forEach(item => {
@@ -191,9 +183,8 @@ exportValue(telnet, "cdc", {
             var fileId = 0
         }
 
-        let path = `${storeDir}/${fileId}-${new Date().toISOString().replace(/[-:]/g, '').replace("T",'_').slice(2, 13)}.txt`
-        openedFile = fs.open(path,'w')
-        return openedFile
+        writingFilePath = `${storeDir}/${fileId}-${new Date().toISOString().replace(/[-:]/g, '').replace("T",'_').slice(2, 13)}.txt`
+        return writingFilePath
     }
     function findLastFile(dir) {
         return fs.listDirSync(dir,true).filter(item => {
@@ -210,9 +201,5 @@ exportValue(telnet, "cdc", {
             return a.fileId - b.fileId
         })
     }
-
-    global.findLastFile = findLastFile
-    global.activeFile = activeFile
-    global.writeLog = writeLog
 
 })()
