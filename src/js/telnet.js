@@ -183,13 +183,13 @@ exportValue(telnet, "cdc", {
             var fileId = 0
         }
 
-        writingFilePath = `${storeDir}/${fileId}-${new Date().toISOString().replace(/[-:]/g, '').replace("T",'_').slice(2, 13)}.txt`
+        writingFilePath = `${storeDir}/${fileId}-${new Date().toISOString().replace(/[-:]/g, '').replace("T",'_').slice(0, 15)}.txt`
         return writingFilePath
     }
     function findLastFile(dir) {
         return fs.listDirSync(dir,true).filter(item => {
             if(item.type=="file") {
-                let res = item.name.match(/^(\d+)\-\d{6}_\d{4}\.txt$/i)
+                let res = item.name.match(/^(\d+)\-\d{8}_\d{4}\.txt$/i)
                 if(!res) {
                     return false
                 }
