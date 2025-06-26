@@ -50,8 +50,8 @@ namespace be {
 #endif
         void updateTime(int64_t ms) ;
 
-        void removeTimer(JSContext *ctx, JSTimerEvent *) ;
-        void removeTimer(JSContext *ctx, uint32_t id) ;
+        bool removeTimer(JSContext *ctx, JSTimerEvent *) ;
+        bool removeTimer(JSContext *ctx, uint32_t id) ;
         JSTimerEvent * findWithId(uint32_t id) ;
     } ;
 }

@@ -73,10 +73,18 @@ gpio.apiSetHandler(function(pin,level){
         return
     }
     for(let callback of mapPinToWatchings[pin][edge]) {
-        callback(pin,level)
+        try{
+            callback(pin,level)
+        }catch(e){
+            console.error()(`Error in callback for pin ${pin} on edge ${edge}:`, e)
+        }
     }
     for(let callback of mapPinToWatchings[pin].both) {
-        callback(pin,level)
+        try{
+            callback(pin,level)
+        }catch(e){
+            console.error()(`Error in callback for pin ${pin} on edge ${edge}:`, e)
+        }
     }
 })
 

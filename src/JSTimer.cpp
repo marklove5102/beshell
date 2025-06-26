@@ -24,17 +24,19 @@ namespace be {
 
     class JSTimerEvent {
     public :
+        uint64_t deadline ;
+        uint64_t interval ;
+        uint32_t id ;
+
         JSValue func ;
         JSValue thisobj ;
         int argc ;
         JSValueConst * argv ;
 
-        uint64_t deadline ;
-        uint64_t interval ;
         bool repeat:1 ;
         bool requestAnimationFrame:1 ;
         bool debug:1 ;
-        uint32_t id ;
+        bool removing:1 ;
     
         void destroy (JSContext * ctx) {
             JS_FreeValue(ctx, func) ;
@@ -79,10 +81,23 @@ namespace be {
 
         for(auto it = events.begin(); it != events.end();) {
             auto event = *it ;
+
+            if(!event||event->removing) {
+                events.erase(it);
+                if(event) {
+                    event->destroy(ctx) ;
+                    delete event ;
+                }
+                continue ; // 此处不使用 it++，因为它已经被删除了
+            }
+
             if(event->deadline <= now) {
                 if(!JS_IsFunction(ctx, event->func)) {
                     printf("timer callback is not a function, event:%p, total event: %d\n",events,events.size()) ;
-                    removeTimer(ctx, event) ;
+                    if( !removeTimer(ctx, event) ){
+                        // 如果删除成功，不会执行 it++
+                        it ++ ; 
+                    }
                     continue ;
                 }
 
@@ -94,7 +109,10 @@ namespace be {
 
                 // 一次性任务
                 if(!event->repeat) {
-                    removeTimer(ctx, event->id) ;
+                    if( !removeTimer(ctx, event->id) ){
+                        // 如果删除成功，不会执行 it++
+                        it ++ ; 
+                    }
                     continue ;
                 }
 
@@ -106,12 +124,9 @@ namespace be {
                 else {
                     event->deadline+= event->interval ;
                 }
-
-                it ++ ;
             }
-            else {
-                it ++ ;
-            }
+            
+            it ++ ;
         }
         
         give(false) ;
@@ -164,8 +179,21 @@ namespace be {
     JSValue JSTimer::jsClearTimeout(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
         CHECK_ENGINE
         ASSERT_ARGC(1)
-        ARGV_TO_UINT32(0, id)
-        engine->timer.removeTimer(ctx, id) ;
+        ARGV_TO_INT32(0, id)
+        if(id<0) {
+            JSTHROW("Invalid timer id") ;
+        }
+
+        JSTimerEvent * event = engine->timer.findWithId(id) ;
+        if( !event ){
+            printf("clearTimeout(): timer id %d not found\n", id) ;
+            return JS_UNDEFINED ;
+        }
+
+        // clearTimeout 可能在 event loop 中调用，所以不直接从事件队列里删除，等到下一次 loop 时再删除
+        // 通过设置 removing 标志来标记为删除状态
+        event->removing = true ;
+
         return JS_UNDEFINED ;
     }
     
@@ -252,7 +280,8 @@ namespace be {
         event->repeat = repeat ;
         event->requestAnimationFrame = false ;
         event->deadline = gettime() + interval ;
-        event->debug = 0 ;
+        event->debug = false ;
+        event->removing = false ;
 
         // @todo 避免重复
         lastTimerId ++ ;
@@ -284,25 +313,27 @@ namespace be {
         return event ;
     }
     
-    void JSTimer::removeTimer(JSContext *ctx, JSTimerEvent * event) {
+    bool JSTimer::removeTimer(JSContext *ctx, JSTimerEvent * event) {
         MUTEX({
             auto it = std::find(events.begin(),events.end(),event) ;
             if(it==events.end()) {
                 printf("removing timer event not found\n") ;
                 give(false) ;
-                return ;
+                return false ;
             }
             events.erase(it);
         })
         event->destroy(ctx) ;
         delete event ;
+        return true ;
     }
     
-    void JSTimer::removeTimer(JSContext *ctx, uint32_t id) {
+    bool JSTimer::removeTimer(JSContext *ctx, uint32_t id) {
         JSTimerEvent * event = findWithId(id) ;
         if(event) {
-            removeTimer(ctx, event) ;
+            return removeTimer(ctx, event) ;
         }
+        return false ;
     }
 
     JSTimerEvent * JSTimer::findWithId(uint32_t id) {

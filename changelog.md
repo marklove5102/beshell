@@ -32,6 +32,9 @@ New Feature:
 
 Fix issure:
 
+* 解决了在 setInterval 的 callback 中调用 clearTimeout() 导致事件循环错乱
+* gpio.watch() 打印 callback 抛出的异常
+
 ## v0.3.7   2025-04-26
 
 Added: 
