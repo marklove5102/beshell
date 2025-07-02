@@ -67,13 +67,42 @@ namespace be{
         THIS_NCLASS(Partition, self)
         CHECK_ARGC(2)
         ARGV_TO_UINT32(0, offset)
-        ARGV_TO_ARRAYBUFFER(1, data, datalen)
+        
+        uint8_t* data = NULL;
+        size_t datalen = 0;
+        esp_err_t err = ESP_OK;
+        
+        // Check if argument is ArrayBuffer
+        if (JS_IsArrayBuffer(argv[1])) {
+            ARGV_TO_ARRAYBUFFER(1, buffer, bufferlen)
+            data = buffer;
+            datalen = bufferlen;
 
-        esp_err_t err = esp_partition_write(self->partition, offset, data, datalen) ;
-        if(err!=ESP_OK) {
-            JSTHROW("write failed: %d", err)
+            err = esp_partition_write(self->partition, offset, data, datalen);
+            if(err != ESP_OK) {
+                JSTHROW("write failed: %d", err)
+            }
         }
-        return JS_UNDEFINED ;
+        // Check if argument is string
+        else if (JS_IsString(argv[1])) {
+
+            size_t str_len = 0;
+            const char* str = JS_ToCStringLen(ctx, &str_len, argv[1]);
+            if (!str) {
+                JSTHROW("invalid string data")
+            }
+            
+            err = esp_partition_write(self->partition, offset, (const uint8_t*)str, str_len);
+            JS_FreeCString(ctx, str);
+            
+            if (err != ESP_OK) {
+                JSTHROW("write failed: %d", err)
+            }
+        } else {
+            JSTHROW("write data must be an ArrayBuffer or string")
+        }
+        
+        return JS_UNDEFINED;
     }
 
     JSValue Partition::checksum(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
