@@ -477,7 +477,7 @@ function top(detail=false) {
         // 获取重启原因
         esp_reset_reason_t reason = esp_reset_reason();
 
-        char * const reason_str = nullptr;
+        const char * reason_str = nullptr;
 
         // 打印重启原因
         switch (reason) {
