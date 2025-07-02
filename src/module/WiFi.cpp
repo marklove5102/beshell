@@ -1363,7 +1363,7 @@ namespace be {
         uint8_t mac_str[18] = {0} ;
         snprintf(mac_str, sizeof(mac_str), "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]) ;
 
-        return JS_NewString(ctx, mac_str) ;
+        return JS_NewString(ctx, (const char *)mac_str) ;
 
     }
 }

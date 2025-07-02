@@ -380,7 +380,7 @@ namespace be {
 
             TaskStatus_t *pxTaskStatusArray;
             UBaseType_t uxArraySize = uxTaskGetNumberOfTasks();
-            pxTaskStatusArray = malloc(uxArraySize * sizeof(TaskStatus_t));
+            pxTaskStatusArray = (TaskStatus_t *)malloc(uxArraySize * sizeof(TaskStatus_t));
         
             if (pxTaskStatusArray != NULL) {
                 uxArraySize = uxTaskGetSystemState(

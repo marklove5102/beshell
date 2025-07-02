@@ -477,7 +477,7 @@ function top(detail=false) {
         // 获取重启原因
         esp_reset_reason_t reason = esp_reset_reason();
 
-        char * reason_str = nullptr;
+        char * const reason_str = nullptr;
 
         // 打印重启原因
         switch (reason) {
@@ -610,7 +610,7 @@ function top(detail=false) {
 #ifdef CONFIG_FREERTOS_USE_TRACE_FACILITY
         TaskStatus_t *pxTaskStatusArray;
         UBaseType_t uxArraySize = uxTaskGetNumberOfTasks();
-        pxTaskStatusArray = malloc(uxArraySize * sizeof(TaskStatus_t));
+        pxTaskStatusArray = (TaskStatus_t *)malloc(uxArraySize * sizeof(TaskStatus_t));
     
         if (pxTaskStatusArray != NULL) {
             uxArraySize = uxTaskGetSystemState(
