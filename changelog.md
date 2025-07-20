@@ -29,6 +29,7 @@ New Feature:
 * wifi.setMAC()
 * wifi.getMAC()
 * gpio pwm function
+* logger module
 
 Fix issure:
 

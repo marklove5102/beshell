@@ -21,7 +21,7 @@ class Central extends EventEmitter {
       this.emit("disconnect", connid, addr)
     })
     bt.on("central.open", (status, connid, addr) => {
-      console.log("central.open", status, connid, addr)
+      // console.log("central.open", status, connid, addr)
       if (status == 0) {
         this._mapConnId[connid] = new Peer(addr, connid)
         this._mapAddr[addr] = this._mapConnId[connid]

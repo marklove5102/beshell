@@ -34,6 +34,7 @@
 #include "module/WiFi.hpp"
 #include "module/OTA.hpp"
 #include "module/Flash.hpp"
+#include "module/logger/Logger.hpp"
 #if CONFIG_BT_BLUEDROID_ENABLED
 #include "module/bt/BT.hpp"
 #elif CONFIG_BT_NIMBLE_ENABLED

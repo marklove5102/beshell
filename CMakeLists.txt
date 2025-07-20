@@ -181,8 +181,21 @@ if (COMMAND component_compile_options)
     component_compile_options(-Wno-missing-field-initializers)
     component_compile_options(-Wno-pointer-arith)
 
-    
 endif ()
+
+
+# for Logger
+target_link_options(${COMPONENT_TARGET} PUBLIC
+    # "-Wl,--wrap=write"
+    # "-Wl,--wrap=printf"
+    # "-Wl,--wrap=vprintf"
+)
+target_compile_options(${COMPONENT_TARGET} PUBLIC
+    # -fno-builtin-write
+    # -fno-builtin-printf
+    # -fno-builtin-vprintf
+)
+
 
 # string(REPLACE "-fno-rtti" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 # string(REPLACE "-fno-exceptions" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
