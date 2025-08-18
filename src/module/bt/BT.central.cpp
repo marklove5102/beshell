@@ -401,7 +401,7 @@ namespace be {
     }
 
     JSValue BT::setScanParam(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-                                                                                                                                                    #if (BLE_42_FEATURE_SUPPORT == TRUE)
+#if (BLE_42_FEATURE_SUPPORT == TRUE)
     
         CHECK_ARGC(1)
 

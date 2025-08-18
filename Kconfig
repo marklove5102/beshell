@@ -1,0 +1,10 @@
+menu "BeShell Configuration"
+
+    config BESHELL_LOGGER_ENABLE_WRAP
+        bool "Enable Logger Module Wrap"
+        default n
+        help
+            Enable the Logger module for BeShell. Allow logger module wrapping write/printf/vprintf.
+
+
+endmenu

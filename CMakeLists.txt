@@ -184,6 +184,24 @@ if (COMMAND component_compile_options)
     
 endif ()
 
+# for Logger
+if(CONFIG_BESHELL_LOGGER_ENABLE_WRAP)
+    target_link_options(${COMPONENT_TARGET} PUBLIC
+        "-Wl,--wrap=write"
+        "-Wl,--wrap=printf"
+        "-Wl,--wrap=vprintf"
+    )
+    target_compile_options(${COMPONENT_TARGET} PUBLIC
+        -fno-builtin-write
+        -fno-builtin-printf
+        -fno-builtin-vprintf
+    )
+    message(STATUS "Logger module enabled")
+else()
+    message(STATUS "Logger module disabled, use default write/printf/vprintf")
+endif ()
+
+
 # string(REPLACE "-fno-rtti" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 # string(REPLACE "-fno-exceptions" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 #clang
