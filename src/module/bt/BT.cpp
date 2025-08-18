@@ -3,6 +3,7 @@
 #if CONFIG_BT_BLUEDROID_ENABLED
 
 #include "esp_bt.h"
+#include "esp_mac.h"
 #include "esp_bt_defs.h"
 #include "esp_bt_main.h"
 #include "esp_err.h"
@@ -384,7 +385,7 @@ namespace be{
         }
         
         // 设置 BLE MAC 地址
-        esp_err_t ret = esp_ble_gap_set_rand_addr(mac_addr);
+        esp_err_t ret = esp_base_mac_addr_set(mac_addr);
         if( ret != ESP_OK ) {
             JSTHROW("Failed to set MAC address: %s", esp_err_to_name(ret))
         }
