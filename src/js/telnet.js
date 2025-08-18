@@ -157,17 +157,18 @@ exportValue(telnet, "cdc", {
         logger = null
     })
     function writeLog (data) {
+        try{
+            if( !writingFilePath || wroteBytes>fileSize ) {
+                createNewLogFile()
+            }
 
-        if( !writingFilePath || wroteBytes>fileSize ) {
-            createNewLogFile()
-        }
-
-        let content = `[${new Date().toISOString().replace("T", ' ').slice(0,19)}] ${data.asString()}`
-        if(content[content.length-1] != '\n') {
-            content += '\n'
-        }
-        fs.writeFileSync(writingFilePath, content, true)
-        wroteBytes+= content.length
+            let content = `[${new Date().toISOString().replace("T", ' ').slice(0,19)}] ${data.asString()}`
+            if(content[content.length-1] != '\n') {
+                content += '\n'
+            }
+            fs.writeFileSync(writingFilePath, content, true)
+            wroteBytes+= content.length
+        }catch (e) {}
     }
     function createNewLogFile() {
         let logFiles = findLastFile(storeDir)

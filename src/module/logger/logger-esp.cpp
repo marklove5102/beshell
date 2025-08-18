@@ -67,11 +67,14 @@ static TaskHandle_t s_log_task_handle = nullptr;
 static QueueHandle_t s_log_queue = nullptr;
 
 extern "C" {
-    // 声明原始函数
+
+#ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
     int __real_printf(const char *format, ...);
-    int __real_vprintf(const char *format, va_list args);
-    int __real_write(int fd, const void *buf, size_t count);
-};
+#else
+    #define __real_printf printf
+#endif
+
+}
 
 static bool meta_load() {
     if(!s_log_partition) {

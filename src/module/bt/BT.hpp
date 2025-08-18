@@ -59,6 +59,7 @@ namespace be{
         static JSValue setAdvData(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
         static JSValue startAdv(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
         static JSValue stopAdv(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+        static JSValue setMac(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
         static void setGapHandler(gap_handler_t handler) ;
 

@@ -59,6 +59,7 @@ namespace be{
 
         EXPORT_FUNCTION(setPower)
         EXPORT_FUNCTION(power)
+        EXPORT_FUNCTION(setMac)
 
         // peripheral
         EXPORT_FUNCTION(setAdvName)
@@ -358,6 +359,36 @@ namespace be{
     }
     JSValue BT::power(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return JS_NewInt32(ctx, esp_ble_tx_power_get(ESP_BLE_PWR_TYPE_DEFAULT)) ;
+    }
+    
+    
+    JSValue BT::setMac(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+        CHECK_ARGC(1)
+        
+        // 获取输入的 MAC 地址字符串
+        const char *mac_str = JS_ToCString(ctx, argv[0]);
+        if (!mac_str) {
+            JSTHROW("Invalid MAC address string")
+        }
+        
+        // 解析 MAC 地址字符串 "xx:xx:xx:xx:xx:xx"
+        uint8_t mac_addr[6];
+        int parsed = sscanf(mac_str, "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx",
+                           &mac_addr[0], &mac_addr[1], &mac_addr[2], 
+                           &mac_addr[3], &mac_addr[4], &mac_addr[5]);
+        
+        JS_FreeCString(ctx, mac_str);
+        
+        if (parsed != 6) {
+            JSTHROW("Invalid MAC address format, expected xx:xx:xx:xx:xx:xx")
+        }
+        
+        // 设置 BLE MAC 地址
+        esp_err_t ret = esp_ble_gap_set_rand_addr(mac_addr);
+        if( ret != ESP_OK ) {
+            JSTHROW("Failed to set MAC address: %s", esp_err_to_name(ret))
+        }
+        return JS_UNDEFINED ;
     }
 }
 
