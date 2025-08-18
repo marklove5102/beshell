@@ -4,13 +4,12 @@
 #include <stdio.h>   // 为 snprintf
 #include "logger-imp.hpp"
 
+#ifdef ESP_PLATFORM
 // ESP32 中定义 ssize_t
 #ifndef _SSIZE_T_DEFINED
 typedef int ssize_t;
 #define _SSIZE_T_DEFINED
 #endif
-
-
 extern "C" {
 
 #ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
@@ -22,6 +21,11 @@ extern "C" {
 #endif
 
 }
+
+// 声明 printf 函数
+extern "C" int printf(const char *format, ...);
+
+#endif
 
 namespace be {
     
@@ -460,8 +464,12 @@ namespace be {
         // 获取日志总长度
         size_t total_length = length();
         if (total_length == 0) {
+#ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
             __real_printf("No log data available\n");
-            return JS_UNDEFINED ;
+#else
+            printf("No log data available\n");
+#endif
+            return JS_UNDEFINED;
         }
 
         // 从头开始读取，寻找指定页的内容
@@ -513,7 +521,11 @@ namespace be {
                 
                 // 输出字符（如果在目标范围内）
                 if (in_target_range && lines_found > target_start_line && lines_found <= target_end_line) {
+#ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
                     __real_printf("%c", buffer[i]);
+#else
+                    printf("%c", buffer[i]);
+#endif
                 }
             }
             
@@ -530,7 +542,11 @@ namespace be {
         
         // 如果没有找到任何内容，输出提示
         if (lines_output == 0) {
+#ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
             __real_printf("Page not found\n");
+#else
+            printf("Page not found\n");
+#endif
         }
 
         return JS_UNDEFINED;
@@ -560,8 +576,9 @@ namespace be {
         int64_t page = 0;
         int64_t lines_per_page = 20;
 
+#ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
         ScopedCapture capture; // 自动暂停和恢复日志捕获
-
+#endif
         // 解析第一个参数：页码
         if (argc >= 1 && !JS_IsUndefined(argv[0])) {
             if (JS_ToInt64(ctx, &page, argv[0]) < 0) {
@@ -585,8 +602,10 @@ namespace be {
         // 获取日志总长度
         size_t total_length = length();
         if (total_length == 0) {
+#ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
             __real_printf("No log data available\n");
-            return JS_UNDEFINED ;
+#endif
+            return JS_UNDEFINED;
         }
 
         // 先从头扫描，计算总行数
@@ -625,8 +644,13 @@ namespace be {
         }
         
         if (total_lines == 0) {
+#ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
             __real_printf("No lines found in log\n");
             return JS_UNDEFINED ;
+#else
+            printf("No lines found in log\n");
+            return JS_UNDEFINED;
+#endif
         }
         
         // 计算要显示的行范围（从后往前）
@@ -634,8 +658,13 @@ namespace be {
         size_t skip_pages = (size_t)page;
         
         if (skip_pages * target_lines >= total_lines) {
+#ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
             __real_printf("Page not found\n");
             return JS_UNDEFINED ;
+#else
+            printf("Page not found\n");
+            return JS_UNDEFINED;
+#endif
         }
         
         // 计算目标行的起始和结束位置
@@ -663,7 +692,11 @@ namespace be {
                     if (!in_target_range) {
                         in_target_range = true;
                     }
+#ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
                     __real_printf("%c", buffer[i]);
+#else
+                    printf("%c", buffer[i]);
+#endif
                 }
                 
                 // 检查是否需要换行
@@ -693,7 +726,6 @@ namespace be {
         if (read_pos >= total_length && chars_in_current_line > 0) {
             current_line++;
         }
-        
         return JS_UNDEFINED;
     }
 

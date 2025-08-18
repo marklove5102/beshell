@@ -5,6 +5,8 @@
 
 namespace be {
 
+    typedef void (* ConsoleWriteHandler)(const char * buff, size_t len) ;
+
     class Console: public NativeClass {
         DECLARE_NCLASS_META
         static std::vector<JSCFunctionListEntry> methods ;
@@ -19,6 +21,8 @@ namespace be {
         static JSValue jsLog(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
         static void setChannel(const char * channelName) ;
+
+        static ConsoleWriteHandler writeHandler ;
 
     private:
         JSValue jsStringify = JS_UNDEFINED ;

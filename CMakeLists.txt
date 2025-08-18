@@ -181,7 +181,6 @@ if (COMMAND component_compile_options)
     component_compile_options(-Wno-missing-field-initializers)
     component_compile_options(-Wno-pointer-arith)
 
-    
 endif ()
 
 # for Logger

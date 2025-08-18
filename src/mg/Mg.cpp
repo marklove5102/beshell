@@ -558,7 +558,7 @@ namespace be::mg {
             JSTHROW("captive portal already started")
         }
 
-        connCaptiveProtal = mg_listen(&mgr, "udp://0.0.0.0:53", captivePortalHandler, NULL);
+        connCaptiveProtal = mg_listen(&mgr, "udp://0.0.0.0:53", (mg_event_handler_t) captivePortalHandler, NULL);
 
         return JS_UNDEFINED ;
     }

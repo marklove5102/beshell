@@ -27,11 +27,11 @@ static bool s_log_capture_enabled = false;
 extern "C" {
 
 #ifdef CONFIG_BESHELL_LOGGER_ENABLE_WRAP
-
+    // 声明原始函数
     int __real_printf(const char *format, ...);
     int __real_vprintf(const char *format, va_list args);
     ssize_t __real_write(int fd, const void *buf, size_t count);
-    
+
     // 实现 __wrap_write
     ssize_t __wrap_write(int fd, const void *buf, size_t count) {
         // 如果有可用的日志系统，写入日志

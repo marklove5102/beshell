@@ -140,9 +140,17 @@ namespace be{
         return JS_UNDEFINED ;
     }
 
+
     /**
-     * length
-     * timeout=20ms
+     * 从UART读取数据
+     * 
+     * 读取指定长度的数据，返回一个ArrayBuffer对象。
+     * 如果没有数据可读，将返回一个空的ArrayBuffer。
+     * 
+     * @function read
+     * @param len:number 要读取的字节数
+     * @param timeout:number=20 读取超时时间（毫秒），默认为20毫秒
+     * @return ArrayBuffer 读取到的数据
      */
     JSValue UART::read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(UART, uart)

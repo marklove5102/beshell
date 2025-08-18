@@ -12,6 +12,7 @@ namespace be {
     DEFINE_NCLASS_META(Console,NativeClass)
 
     char const  * Console::channelName = nullptr ;
+    ConsoleWriteHandler Console::writeHandler = nullptr ;
 
     std::vector<JSCFunctionListEntry> Console::methods = {
         JS_CFUNC_DEF("write", 1, jsWrite),
@@ -181,6 +182,10 @@ function block(buffer, columns, separator, numSys) {
 
         if(argc>1) {
             JS_FreeCString(ctx, cname) ;
+        }
+
+        if(writeHandler){
+            writeHandler(str.c_str(), str.length()) ;
         }
 
         return JS_UNDEFINED ;
