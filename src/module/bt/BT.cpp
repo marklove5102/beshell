@@ -60,7 +60,7 @@ namespace be{
 
         EXPORT_FUNCTION(setPower)
         EXPORT_FUNCTION(power)
-        EXPORT_FUNCTION(setMac)
+        EXPORT_FUNCTION(setRandomMac)
 
         // peripheral
         EXPORT_FUNCTION(setAdvName)
@@ -364,7 +364,7 @@ namespace be{
     }
     
     
-    JSValue BT::setMac(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    JSValue BT::setRandomMac(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_ARGC(1)
         
         // 获取输入的 MAC 地址字符串
@@ -386,7 +386,7 @@ namespace be{
         }
         
         // 设置 BLE MAC 地址
-        esp_err_t ret = esp_base_mac_addr_set(mac_addr);
+        esp_err_t ret = esp_ble_gap_set_rand_addr(mac_addr);
         if( ret != ESP_OK ) {
             JSTHROW("Failed to set MAC address: %s", esp_err_to_name(ret))
         }

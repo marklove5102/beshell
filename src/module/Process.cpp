@@ -35,7 +35,9 @@ namespace be {
         exportFunction("getRunningTime", getRunningTime);
         exportFunction("getChipTemperature", getChipTemperature);
         exportFunction("readEFUSE", readEFUSE);
-        exportFunction("readMac", readMac);
+        exportFunction("readMac", getMac);
+        exportFunction("getMac", getMac);
+        exportFunction("setMac", setMac);
         exportFunction("gc", gc);
         exportFunction("ref", ref);
         exportFunction("getTimerCount", JSTimer::getTimerCount);
@@ -149,12 +151,12 @@ function top(detail=false) {
     /**
      * 读硬件地址
      * 
-     * @function readMac
+     * @function getMac
      * @param phy:"wifi"|"wifi.ap"|"wifi.softap"|"ble"|"eth"|"base"|"efuse"|"efuse.factory"|"efuse.customer"|"efuse.ext"="wifi" 要读取的硬件类型
      * @param format:bool=false 返回格式，false返回ArrayBuffer，true返回十六进制字符串
      * @return ArrayBuffer|string 硬件地址
      */
-    JSValue Process::readMac(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    JSValue Process::getMac(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         
         uint8_t mac[8] ;
 
@@ -211,6 +213,120 @@ function top(detail=false) {
             sprintf(macstr,"%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
             return JS_NewString(ctx, macstr) ;
         }
+    }
+    
+    /**
+     * 设置硬件地址
+     * 
+     * @function setMac
+     * @param macAddr:string|ArrayBuffer|Uint8Array MAC地址，可以是字符串格式"xx:xx:xx:xx:xx:xx"、6字节的ArrayBuffer或6字节的Uint8Array
+     * @return undefined
+     */
+    JSValue Process::setMac(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+        CHECK_ARGC(1)
+        
+        uint8_t mac_addr[6];
+        
+        // 检查输入参数类型
+        if (JS_IsString(argv[0])) {
+            // 处理字符串输入
+            const char *mac_str = JS_ToCString(ctx, argv[0]);
+            if (!mac_str) {
+                JSTHROW("Invalid MAC address string")
+            }
+            
+            // 解析 MAC 地址字符串 "xx:xx:xx:xx:xx:xx"
+            int parsed = sscanf(mac_str, "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx",
+                               &mac_addr[0], &mac_addr[1], &mac_addr[2], 
+                               &mac_addr[3], &mac_addr[4], &mac_addr[5]);
+            
+            JS_FreeCString(ctx, mac_str);
+            
+            if (parsed != 6) {
+                JSTHROW("Invalid MAC address format, expected xx:xx:xx:xx:xx:xx")
+            }
+        }
+        else if (JS_IsArrayBuffer(argv[0])) {
+            // 处理 ArrayBuffer 输入
+            size_t size;
+            uint8_t *buffer = JS_GetArrayBuffer(ctx, &size, argv[0]);
+            if (!buffer) {
+                JSTHROW("Failed to get ArrayBuffer data")
+            }
+            
+            if (size != 6) {
+                JSTHROW("ArrayBuffer size must be 6 bytes for MAC address")
+            }
+            
+            // 复制 MAC 地址数据
+            memcpy(mac_addr, buffer, 6);
+        }
+        else if (JS_IsObject(argv[0])) {
+            // 检查是否为 Uint8Array 或其他 TypedArray
+            JSValue buffer_prop = JS_GetPropertyStr(ctx, argv[0], "buffer");
+            JSValue length_prop = JS_GetPropertyStr(ctx, argv[0], "length");
+            JSValue byteOffset_prop = JS_GetPropertyStr(ctx, argv[0], "byteOffset");
+            
+            if (!JS_IsUndefined(buffer_prop) && !JS_IsUndefined(length_prop) && !JS_IsUndefined(byteOffset_prop)) {
+                // 这是一个 TypedArray (如 Uint8Array)
+                uint32_t length;
+                uint32_t byteOffset;
+                
+                if (JS_ToUint32(ctx, &length, length_prop) != 0) {
+                    JS_FreeValue(ctx, buffer_prop);
+                    JS_FreeValue(ctx, length_prop);
+                    JS_FreeValue(ctx, byteOffset_prop);
+                    JSTHROW("Failed to get TypedArray length")
+                }
+                
+                if (JS_ToUint32(ctx, &byteOffset, byteOffset_prop) != 0) {
+                    JS_FreeValue(ctx, buffer_prop);
+                    JS_FreeValue(ctx, length_prop);
+                    JS_FreeValue(ctx, byteOffset_prop);
+                    JSTHROW("Failed to get TypedArray byteOffset")
+                }
+                
+                if (length != 6) {
+                    JS_FreeValue(ctx, buffer_prop);
+                    JS_FreeValue(ctx, length_prop);
+                    JS_FreeValue(ctx, byteOffset_prop);
+                    JSTHROW("TypedArray length must be 6 bytes for MAC address")
+                }
+                
+                // 获取底层 ArrayBuffer
+                size_t buffer_size;
+                uint8_t *buffer_data = JS_GetArrayBuffer(ctx, &buffer_size, buffer_prop);
+                if (!buffer_data || byteOffset + length > buffer_size) {
+                    JS_FreeValue(ctx, buffer_prop);
+                    JS_FreeValue(ctx, length_prop);
+                    JS_FreeValue(ctx, byteOffset_prop);
+                    JSTHROW("Failed to get TypedArray buffer data")
+                }
+                
+                // 复制 MAC 地址数据
+                memcpy(mac_addr, buffer_data + byteOffset, 6);
+                
+                JS_FreeValue(ctx, buffer_prop);
+                JS_FreeValue(ctx, length_prop);
+                JS_FreeValue(ctx, byteOffset_prop);
+            }
+            else {
+                JS_FreeValue(ctx, buffer_prop);
+                JS_FreeValue(ctx, length_prop);
+                JS_FreeValue(ctx, byteOffset_prop);
+                JSTHROW("MAC address must be a string (xx:xx:xx:xx:xx:xx), ArrayBuffer (6 bytes), or Uint8Array (6 bytes)")
+            }
+        }
+        else {
+            JSTHROW("MAC address must be a string (xx:xx:xx:xx:xx:xx), ArrayBuffer (6 bytes), or Uint8Array (6 bytes)")
+        }
+        
+        // 设置 MAC 地址
+        esp_err_t ret = esp_base_mac_addr_set(mac_addr);
+        if( ret != ESP_OK ) {
+            JSTHROW("Failed to set MAC address: %s", esp_err_to_name(ret))
+        }
+        return JS_UNDEFINED ;
     }
 
     /**
