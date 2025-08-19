@@ -3,7 +3,7 @@ New Feature:
 
 * bt.setPower() add arg `type`
 * bt.getMTU()
-* bt.setMac()
+* bt.setRandomMac()
 * bt.setCharValue()
 * reboot 命令增加可选参数 path 
 * source 命令可以使用参数
@@ -19,6 +19,8 @@ New Feature:
 * process.getChipTemperature()
 * process.resetReason()
 * process.top()
+* process.getMac()
+* process.setMac()
 * process.tasks()
 * process.cpuCount()
 * login / logout cmd
