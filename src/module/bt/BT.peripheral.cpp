@@ -49,7 +49,7 @@ namespace be {
                 ESP_LOGI(GATTS_TAG, "ESP_GATTS_REG_EVT, status %d, app_id %d", param->reg.status, param->reg.app_id);
                 gatts_if_global = gatts_if;
                 gatts_sem_success = (param->reg.status == ESP_GATT_OK);
-                
+                printf("ESP_GATTS_REG_EVT   gatts_if_global=%d\n", gatts_if_global);
                 if (gatts_sem != NULL) {
                     xSemaphoreGive(gatts_sem);
                 }
@@ -96,6 +96,7 @@ namespace be {
                 break ;
 
             case ESP_GATTS_READ_EVT:
+            
                 break;
 
             case ESP_GATTS_WRITE_EVT:
@@ -504,6 +505,15 @@ namespace be {
 
         uint8_t property = 0;
         uint8_t perm = 0;
+        
+        esp_attr_control_t control = {
+            .auto_rsp = ESP_GATT_AUTO_RSP,
+        };
+        esp_attr_value_t attr_value = {
+            .attr_max_len = 512,
+            .attr_len = 0,
+            .attr_value = NULL
+        };
 
         if (JS_IsString(argv[2])) {
             ARGV_TO_CSTRING(2, perm_str)
@@ -537,6 +547,7 @@ namespace be {
                 JSValue item = JS_GetPropertyUint32(ctx, argv[2], i);
                 if (JS_IsString(item)) {
                     const char* perm_item = JS_ToCString(ctx, item);
+                    ds(perm_item)
                     if (strcmp(perm_item, "read") == 0) {
                         property |= ESP_GATT_CHAR_PROP_BIT_READ;
                         perm |= ESP_GATT_PERM_READ;
@@ -573,8 +584,9 @@ namespace be {
             &uuid,
             perm,
             property,
-            NULL,
-            NULL
+            // NULL, NULL
+            & attr_value,
+            & control
         );
 
         JS_FreeCString(ctx, uuid_str);
@@ -618,6 +630,87 @@ namespace be {
         }
 
         return JS_NewUint32(ctx, last_char_handle);
+    }
+    
+    JSValue BT::setCharValue(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+        CHECK_GATTS_IF
+        CHECK_ARGC(2)
+
+        uint16_t char_handle;
+        if (JS_ToUint32(ctx, (uint32_t*)&char_handle, argv[0]) < 0) {
+            JSTHROW("Invalid characteristic handle")
+        }
+
+        uint8_t* value_data = NULL;
+        uint16_t value_len = 0;
+        bool need_free = false;
+
+        // Handle different value types
+        if (JS_IsString(argv[1])) {
+            // String input
+            const char* str = JS_ToCString(ctx, argv[1]);
+            if (!str) {
+                JSTHROW("Failed to convert string")
+            }
+            value_len = strlen(str);
+            value_data = (uint8_t*)malloc(value_len);
+            if (!value_data) {
+                JS_FreeCString(ctx, str);
+                JSTHROW("Failed to allocate memory for string value")
+            }
+            memcpy(value_data, str, value_len);
+            JS_FreeCString(ctx, str);
+            need_free = true;
+        }
+        else if (JS_IsArrayBuffer(argv[1])) {
+            // ArrayBuffer input
+            size_t buffer_len;
+            uint8_t* buffer_data = (uint8_t*)JS_GetArrayBuffer(ctx, &buffer_len, argv[1]);
+            if (!buffer_data) {
+                JSTHROW("Failed to get ArrayBuffer data")
+            }
+            value_len = (uint16_t)buffer_len;
+            value_data = (uint8_t*)malloc(value_len);
+            if (!value_data) {
+                JSTHROW("Failed to allocate memory for ArrayBuffer value")
+            }
+            memcpy(value_data, buffer_data, value_len);
+            need_free = true;
+        }
+        else if (JS_IsNumber(argv[1])) {
+            // Integer input - convert to 4-byte little-endian
+            int32_t int_value;
+            if (JS_ToInt32(ctx, &int_value, argv[1]) < 0) {
+                JSTHROW("Failed to convert number")
+            }
+            value_len = 4;
+            value_data = (uint8_t*)malloc(value_len);
+            if (!value_data) {
+                JSTHROW("Failed to allocate memory for integer value")
+            }
+            // Store as little-endian
+            value_data[0] = (uint8_t)(int_value & 0xFF);
+            value_data[1] = (uint8_t)((int_value >> 8) & 0xFF);
+            value_data[2] = (uint8_t)((int_value >> 16) & 0xFF);
+            value_data[3] = (uint8_t)((int_value >> 24) & 0xFF);
+            need_free = true;
+        }
+        else {
+            JSTHROW("Value must be string, ArrayBuffer, or number")
+        }
+
+        // Set the characteristic value
+        esp_err_t err = esp_ble_gatts_set_attr_value(char_handle, value_len, value_data);
+        // Free allocated memory for new value
+        if (need_free && value_data) {
+            free(value_data);
+        }
+
+        if (err != ESP_OK) {
+            JSTHROW("esp_ble_gatts_set_attr_value failed, err = %d", err)
+        }
+
+        return JS_UNDEFINED;
     }
 
     JSValue BT::sendNotify(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -728,7 +821,6 @@ namespace be {
 
         return JS_UNDEFINED;
     }
-
     JSValue BT::setMTU(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_ARGC(1)
         ARGV_TO_UINT16(0, mtu)

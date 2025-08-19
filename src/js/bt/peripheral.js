@@ -71,6 +71,9 @@ class Characteristic extends EventEmitter {
     }
     bt.sendNotify(this.handle, data, true, peerConnId)
   }
+  setValue(data) {
+    bt.setCharValue(this.handle, data)
+  }
 }
 
 function charGetter(uuid) {

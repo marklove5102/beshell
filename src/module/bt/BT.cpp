@@ -69,6 +69,7 @@ namespace be{
         EXPORT_FUNCTION(stopAdv)
         EXPORT_FUNCTION(addService)
         EXPORT_FUNCTION(addChar)
+        EXPORT_FUNCTION(setCharValue)
         EXPORT_FUNCTION(sendNotify)
         EXPORT_FUNCTION(setMTU)
         EXPORT_FUNCTION(getMTU)
