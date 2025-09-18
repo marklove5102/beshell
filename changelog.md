@@ -1,6 +1,8 @@
 
 New Feature:
 
+# v0.3.8   2025-09-18
+
 * bt.setPower() add arg `type`
 * bt.getMTU()
 * bt.setRandomMac()
