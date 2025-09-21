@@ -5,6 +5,7 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
+#if CONFIG_USB_OTG_SUPPORTED
 namespace be {
     class TelnetCDC: public TelnetChannel {
     private:
@@ -25,3 +26,4 @@ namespace be {
         void sendData (const char * data, size_t datalen) ;
     } ;
 }
+#endif

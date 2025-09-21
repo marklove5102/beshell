@@ -27,11 +27,22 @@ file(GLOB_RECURSE src_littlefs
     src/*.cpp
 )
 
-if (IDF_VERSION_MAJOR LESS 5)
-    set(requires esp_adc_cal)
-else ()
+# >= IDF 5.0
+if (IDF_VERSION_MAJOR GREATER_EQUAL 5)
+
     set(requires esp_adc)
+
+    # >= IDF 5.4
+    if (IDF_VERSION_MINOR GREATER_EQUAL 4)
+        set(requires ${requires} esp_driver_tsens)
+    endif ()
+
+# < IDF 5.0
+else ()
+    set(requires esp_adc_cal)
 endif ()
+
+
 
 
 idf_component_register(
@@ -53,6 +64,7 @@ idf_component_register(
         esp_wifi
         efuse
         bt
+        esp_driver_tsens
         ${requires}
 )
 

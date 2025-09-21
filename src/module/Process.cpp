@@ -546,7 +546,7 @@ function top(detail=false) {
      * @return number
      */
     JSValue Process::getChipTemperature(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-
+#if SOC_TEMP_SENSOR_SUPPORTED
         esp_err_t err ;
         static bool temp_sensor_initialized = false;
         static temperature_sensor_handle_t temp_handle = NULL;
@@ -580,6 +580,9 @@ function top(detail=false) {
         temperature_sensor_disable(temp_handle);
 
         return JS_NewFloat64(ctx, temp_c); // 返回摄氏度温度值
+#else
+        JSTHROW("Temperature sensor not supported on this chip")
+#endif
     }
 
     

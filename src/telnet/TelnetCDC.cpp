@@ -19,6 +19,7 @@
 
 using namespace std ;
 
+#if CONFIG_USB_OTG_SUPPORTED
 namespace be {
 
     
@@ -105,3 +106,4 @@ namespace be {
         }
     }
 }
+#endif

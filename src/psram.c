@@ -11,7 +11,7 @@
 #ifdef ESP_IDF_VERSION_MAJOR // IDF 4+
 
     #if CONFIG_IDF_TARGET_ESP32 // ESP32/PICO-D4
-        #include "esp32s3/rom/cache.h"
+        #include "esp32/rom/cache.h"
     #elif CONFIG_IDF_TARGET_ESP32S2
         #include "esp32s2/rom/cache.h"
     #elif CONFIG_IDF_TARGET_ESP32S3

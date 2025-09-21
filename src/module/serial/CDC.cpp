@@ -2,6 +2,7 @@
 #include "driver/usb_serial_jtag.h"
 #include "esp_err.h"
 
+#if CONFIG_USB_OTG_SUPPORTED
 namespace be {
 
     char const * const CDC::name = "cdc" ;
@@ -152,5 +153,5 @@ namespace be {
         
         return JS_NewInt32(ctx, bytes_written);
     }
-
 }
+#endif
