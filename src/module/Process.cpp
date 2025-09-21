@@ -7,6 +7,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
+#include "esp_timer.h"
 #include "soc/soc.h"
 #include "esp_efuse.h"
 #include "esp_mac.h"
@@ -68,7 +69,7 @@ namespace be {
         JS_SetPropertyStr(ctx, versions, "lvgl", JS_NewString(ctx, lvgl_ver));
 #endif
 #endif
-        JS_SetPropertyStr(ctx, versions, "quickjs", JS_NewString(ctx, QUICKJS_VERSION));
+        JS_SetPropertyStr(ctx, versions, "quickjs", JS_NewString(ctx, CONFIG_QUICKJS_VERSION));
 
         char buff[32] ;
         sprintf(buff, "%s %s", __DATE__, __TIME__) ;
@@ -533,7 +534,7 @@ function top(detail=false) {
      * @function getRunningTime
      * @return number
      */
-    static JSValue Process::getRunningTime(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    JSValue Process::getRunningTime(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         int64_t boot_time_us = esp_timer_get_time();
         return JS_NewUint32(ctx, boot_time_us / 1000); // 返回毫秒
     }

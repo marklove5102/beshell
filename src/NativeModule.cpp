@@ -4,7 +4,7 @@
 #include <iostream>
 #include "EventEmitter.hpp"
 #include "debug.h"
-#include "deps/quickjs/quickjs.h"
+#include "quickjs/quickjs.h"
 #include "quickjs/quickjs.h"
 
 #ifdef ESP_PLATFORM

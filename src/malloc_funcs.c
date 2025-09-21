@@ -6,9 +6,9 @@
 #define MALLOC_OVERHEAD 8
 
 /* default memory allocation functions with memory limitation */
-static inline size_t js_def_malloc_usable_size(void *ptr) {
-    return malloc_usable_size(ptr);
-}
+// static inline size_t js_def_malloc_usable_size(void *ptr) {
+//     return malloc_usable_size(ptr);
+// }
 
 void *js_def_malloc(JSMallocState *s, size_t size) {
     void *ptr;

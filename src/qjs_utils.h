@@ -2,8 +2,8 @@
 
 #include "debug.h"
 #include "native_helper.h"
-#include "deps/quickjs/quickjs-libc.h"
-#include "deps/quickjs/cutils.h"
+#include "../deps/quickjs/quickjs-libc.h"
+#include "../deps/quickjs/cutils.h"
 #include <stdbool.h>
 #include <string.h>
 

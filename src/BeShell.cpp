@@ -62,7 +62,7 @@ namespace be {
 
 )" ;
         cout    << "version BeShell: " << BESHELL_VERSION 
-                << "; quickjs: " << QUICKJS_VERSION
+                << "; quickjs: " << CONFIG_QUICKJS_VERSION
                 << " ; esp-idf: " << ESPIDF_VERSION 
                 << "\r\n" ;
         cout    << "build: " << __DATE__ << " " << __TIME__ << "\r\n" ;

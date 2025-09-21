@@ -3,6 +3,9 @@
 #include "NativeClass.hpp"
 #include <cstddef>
 
+
+#undef stringify   // defined in quickjs/cutils.h
+
 namespace be {
 
     typedef void (* ConsoleWriteHandler)(const char * buff, size_t len) ;

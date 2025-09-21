@@ -1,8 +1,8 @@
 #ifndef _QUICKJS_PRIVATE_H
 #define _QUICKJS_PRIVATE_H
 
-#include "deps/quickjs/cutils.h"
-#include "deps/quickjs/quickjs-libc.h"
+#include "../deps/quickjs/cutils.h"
+#include "../deps/quickjs/quickjs-libc.h"
 
 
 #ifdef __cplusplus
@@ -271,6 +271,8 @@ struct JSClass {
     /* pointers for exotic behavior, can be NULL if none are present */
     const JSClassExoticMethods *exotic;
 };
+
+typedef struct JSObject JSObject;
 
 #define JS_MODE_STRICT (1 << 0)
 #define JS_MODE_STRIP  (1 << 1)

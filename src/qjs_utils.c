@@ -1,4 +1,5 @@
 #include "qjs_utils.h"
+#include "quickjs/quickjs.h"
 #include "mallocf.h"
 #include <time.h>
 #include <stdarg.h>
@@ -108,7 +109,7 @@ uint8_t * JS_ArrayToBufferUint8(JSContext *ctx, JSValue array, int * len) {
 	if(!JS_IsArray(ctx, array)) {
 		return NULL ;
 	}
-	JSValue jslen = JS_GetPropertyStr(ctx, array, "length") ;
+	JSValueConst jslen = JS_GetPropertyStr(ctx, array, "length") ;
 	if(JS_ToUint32(ctx, len, jslen)!=0) {
 		JS_FreeValue(ctx, jslen) ;
 		return NULL ;

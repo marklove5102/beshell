@@ -65,6 +65,7 @@ namespace be {
             char * dir = (char *) malloc(strlen(fullpath)+1) ;
             path_dirname(fullpath,dir) ;
 
+            // JSValue ns = JS_LoadModule(ctx, fullpath, modulename) ;  // 新版 quickjs api
             JSModuleDef * mdef = JS_RunModule(ctx, fullpath, modulename) ;
             
             JS_FreeCString(ctx, fullpath) ;
@@ -84,7 +85,7 @@ namespace be {
             JS_FreeCString(ctx, modulename) ;
             return ns ;
         }
-        
+
         static JSValue jsFilename(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
             int32_t stack = 1 ;
             if(argc>0) {
@@ -239,6 +240,7 @@ namespace be {
 
             if(nm->flagGlobal==1) {
 
+                // JSValue ns = JS_LoadModule(ctx, "", (const char *)pair.first); // 新版 quickjs api
                 JSModuleDef * mm = JS_RunModule(ctx, "", (const char *)pair.first);
                 if(mm) {
                     JSValue mi = js_get_module_ns(ctx, mm ) ;

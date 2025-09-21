@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "../deps/littlefs/src/esp_littlefs.h"
+#include "littlefs/src/esp_littlefs.h"
 
 using namespace std ;
 

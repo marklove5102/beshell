@@ -1,8 +1,8 @@
 #include "./Logger.hpp"
 #include "logger-imp.hpp"
-#include "../basic/Console.hpp"
-#include "../telnet/TelnetChannel.hpp"
-#include "../telnet/Protocal.hpp"
+#include "../../basic/Console.hpp"
+#include "../../telnet/TelnetChannel.hpp"
+#include "../../telnet/Protocal.hpp"
 #include <unistd.h>
 #include <stdarg.h>
 #include <string.h>

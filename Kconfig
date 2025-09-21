@@ -1,5 +1,11 @@
 menu "BeShell Configuration"
 
+    config ESP_MAIN_TASK_STACK_SIZE
+        int "Main task stack size"
+        default 10240
+        help
+        Set the main task stack size for your project.
+
     config BESHELL_LOGGER_ENABLE_WRAP
         bool "Enable Logger Module Wrap"
         default n

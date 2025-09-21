@@ -7,7 +7,7 @@
 #include <string>
 #include <memory>
 #include <map>
-#include "deps/quickjs/quickjs.h"
+#include "../../deps/quickjs/quickjs.h"
 #include "FSPartition.hpp"
 
 

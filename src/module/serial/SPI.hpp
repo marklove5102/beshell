@@ -1,6 +1,6 @@
 #pragma once
 
-#include <NativeClass.hpp>
+#include "NativeClass.hpp"
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include <map>

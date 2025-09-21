@@ -11,7 +11,6 @@
 
 //fs
 #include "fs/FSPartition.hpp"
-#include "fs/LittleFS.hpp"
 #include "fs/FatFS.hpp"
 #include "fs/RawFS.hpp"
 #include "fs/FS.hpp"
@@ -22,17 +21,16 @@
 #include "telnet/TelnetBLE.hpp"
 #include "telnet/TelnetSerial.hpp"
 #include "telnet/TelnetStdIO.hpp"
+#include "telnet/TelnetCDC.hpp"
 #include "telnet/Telnet.hpp"
 #include "repl/REPL.hpp"
 
 // module
-#include "module/DeviceTree.hpp"
 #include "module/GPIO.hpp"
 #include "module/NVS.hpp"
 #include "module/Path.hpp"
 #include "module/Process.hpp"
 #include "module/WiFi.hpp"
-#include "module/OTA.hpp"
 #include "module/Flash.hpp"
 #include "module/logger/Logger.hpp"
 #if CONFIG_BT_BLUEDROID_ENABLED
@@ -48,39 +46,6 @@
 #include "module/serial/I2S.hpp"
 #include "module/serial/CDC.hpp"
 
-// mg
-#include "mg/Mg.hpp"
-
-// sqlite3
-#include "module/sqlite3/SQLite3.hpp"
-#include "module/sqlite3/DB.hpp"
-
-//lvgl
-#ifndef ARDUINO
-#include "lv/LV.hpp"
-#endif
-
-// ext
-#include "ext/media/audio/Audio.hpp"
 
 // driver
 #include "driver/DriverModule.hpp"
-#include "driver/input/GT911.hpp"
-#include "driver/sensor/BMP280.hpp"
-#include "driver/sensor/AHT20.hpp"
-#include "driver/sensor/WH4530A.hpp"
-#include "driver/sensor/DS18B20.hpp"
-#include "driver/sensor/MLX90614/MLX90614.hpp"
-#include "driver/sensor/VL53L0X.hpp"
-#include "driver/sensor/TMP117.hpp"
-#include "driver/io/PCA9557.hpp"
-#include "driver/io/TM1650.hpp"
-#include "driver/io/TM1652.hpp"
-#include "driver/sys/DS1307.hpp"
-#include "driver/sys/SDCard.hpp"
-#include "driver/adc/CS1237.hpp"
-#include "driver/disp/ST7701.hpp"
-#include "driver/disp/ST7789.hpp"
-#include "driver/comm/nfc/PN532.hpp"
-#include "driver/comm/eth/W5500.hpp"
-#include "driver/util/ws2812b/WS2812B.hpp"
