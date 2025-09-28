@@ -81,8 +81,8 @@ function genBeShellJS() {
     genDir(__dirname+'/../src/js/bt')
 
     const jsDriverDef = [
-        ["PCA9557", "be::driver::io", __dirname+"/../src/js/driver/io/PCA9557.js", __dirname+"/../src/driver/io/PCA9557.cpp"],
-        ["TM1652", "be::driver::io", __dirname+"/../src/js/driver/io/TM1652.js", __dirname+"/../src/driver/io/TM1652.cpp"]
+        // ["PCA9557", "be::driver::io", __dirname+"/../src/js/driver/io/PCA9557.js", __dirname+"/../src/driver/io/PCA9557.cpp"],
+        // ["TM1652", "be::driver::io", __dirname+"/../src/js/driver/io/TM1652.js", __dirname+"/../src/driver/io/TM1652.cpp"]
     ]
     
     for(let [name, namespace, jspath, cpppath] of jsDriverDef) {
