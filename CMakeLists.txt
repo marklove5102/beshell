@@ -44,7 +44,6 @@ endif ()
 
 
 
-
 idf_component_register(
     SRCS
         ${src_beshell}

@@ -1,5 +1,12 @@
 
-New Feature:
+Add:
+
+* example
+
+Fixed:
+
+* build issues on ESP32
+
 
 # v0.3.8   2025-09-18
 

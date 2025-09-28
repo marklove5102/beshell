@@ -14,6 +14,7 @@
 #include "fs/FatFS.hpp"
 #include "fs/RawFS.hpp"
 #include "fs/FS.hpp"
+#include "fs/LittleFS.hpp"
 
 // telnet/repl
 #include "telnet/Protocal.hpp"

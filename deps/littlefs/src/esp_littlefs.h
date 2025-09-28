@@ -19,7 +19,7 @@
 #include <string.h>
 #include "sdkconfig.h"
 
-#include "littlefs/lfs.h"
+#include "./littlefs/lfs.h"
 
 #ifdef __cplusplus
 extern "C" {
