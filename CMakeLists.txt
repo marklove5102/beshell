@@ -1,30 +1,26 @@
 cmake_minimum_required(VERSION 3.24)
 
-# header dirs
-set(include_dirs
-    ./includes
-)
 
 # source files
 file(GLOB_RECURSE src_beshell
-    src/*.c
-    src/*.cpp
+    ./src/beshell/*.c
+    ./src/beshell/*.cpp
 )
+list(FILTER src_beshell EXCLUDE REGEX ".*/src/beshell/deps/.*")
 
 # quickjs source files
 set(src_quickjs
-    deps/quickjs/quickjs-libc.c
-    deps/quickjs/quickjs.c
-    deps/quickjs/libregexp.c
-    deps/quickjs/cutils.c
+    ./src/beshell/deps/quickjs/quickjs-libc.c
+    ./src/beshell/deps/quickjs/quickjs.c
+    ./src/beshell/deps/quickjs/libregexp.c
+    ./src/beshell/deps/quickjs/cutils.c
     # deps/quickjs/dtoa.c
-    deps/quickjs/libunicode.c
+    ./src/beshell/deps/quickjs/libunicode.c
 )
 
 # littlefs source files
 file(GLOB_RECURSE src_littlefs
-    deps/littlefs/src/*.c
-    src/*.cpp
+    ./src/beshell/deps/littlefs/src/*.c
 )
 
 # >= IDF 5.0
@@ -50,7 +46,7 @@ idf_component_register(
         ${src_quickjs}
         ${src_littlefs}
     INCLUDE_DIRS
-        ${include_dirs}
+        ./src
     PRIV_REQUIRES
         driver
         mbedtls
@@ -67,7 +63,8 @@ idf_component_register(
         ${requires}
 )
 
-target_include_directories(${COMPONENT_LIB} PRIVATE src deps) 
+
+target_include_directories(${COMPONENT_LIB} PRIVATE src/beshell) 
 
 target_link_options(${COMPONENT_TARGET} PRIVATE -DIS_LITTLE_ENDIAN)
 set(CMAKE_CXX_STANDARD 11)
@@ -79,7 +76,7 @@ target_link_options(${COMPONENT_TARGET} PRIVATE "-Wl,--no-warn-common")
 
 
 # quickjs version
-file(READ "${COMPONENT_DIR}/deps/quickjs/VERSION" QJS_VERSION_CONTENT)
+file(READ "${COMPONENT_DIR}/src/beshell/deps/quickjs/VERSION" QJS_VERSION_CONTENT)
 add_definitions(-DCONFIG_QUICKJS_VERSION="${QJS_VERSION_CONTENT}")
 
 

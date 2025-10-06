@@ -1,6 +1,6 @@
 name: "BeShell"
 version: "1.0.0"
-description: "A JavaScript framework for ESP32 Platform"
+description: "A JavaScript framework for ESP32 Platform, providing a powerful scripting environment"
 keywords:
   - "JavaScript"
   - "QuickJS"
