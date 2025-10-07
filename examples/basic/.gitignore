@@ -3,3 +3,6 @@ sdkconfig
 sdkconfig.old
 dist
 .DS_Store
+CMakeLists.update_example.txt
+.cache
+.devcontainer

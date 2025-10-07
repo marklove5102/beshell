@@ -1,5 +1,0 @@
-name: "BeShell-Demo"
-dependencies:
-  become-cool/beshell:
-    version: ">=1.0.1"
-

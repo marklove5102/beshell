@@ -1,5 +1,5 @@
 
-[English](./README-EN.md)
+[English](./README_EN.md)
 
 
 这是 [BeShell](https://beshell.become.cool) 的演示工程。
@@ -18,6 +18,31 @@
 
 * 独立安装 [ESP-IDF](https://docs.espressif.com/projects/esp-idf/zh_CN/v5.4.2/esp32/get-started/index.html) 
 * **推荐** 在 VSCode 中使用 [ESP-IDF 扩展](vscode:extension/espressif.esp-idf-extension) 。
+
+
+## 创建示例工程
+
+在 VSCode 中从 ESP Component Registry 自动创建示例工程（需要 [ESP-IDF 扩展](vscode:extension/espressif.esp-idf-extension)）。
+
+
+1. 快捷键 `Ctrl+Shift+P` ，输入关键词 `component`，选择 `ESP-IDF: Show ESP Comonent Registry` 
+
+    ![](./doc/install-1.png "快捷键 `Ctrl+Shift+P` ，输入关键词 `component`，选择 `ESP-IDF: Show ESP Comonent Registry`")
+
+2. 用关键词 `beshell` 搜索 component 
+
+    ![](./doc/install-2.png "用关键词 `beshell` 搜索 component")
+
+3. 点击例子 `basic` 进入页面
+
+    ![](./doc/install-3.png "点击进入例子 `basic` ")
+
+4. 点击页面上的 `Create project from this example`
+
+    ![](./doc/install-4.png "Create project from this example")
+
+5. 浏览存放工程的本地目录，然后 VScode 的 [ESP-IDF 扩展](vscode:extension/espressif.esp-idf-extension) 会自动下载工程并在新窗口打开。
+
 
 ## 构建和烧录
 
