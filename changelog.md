@@ -1,12 +1,19 @@
 
+# v1.0.3 2025-10-07
+
 Add:
 
 * example
 
-Fixed:
+Fix:
 
 * build issues on ESP32
 
+Refact:
+
+* 按 ESP Componenty Registry 规则打包
+* 移除了 mg、lvgl、sqlite 等依赖第三方库的代码，作为独立的 component 发布
+* 移除了大量驱动代码、ota 等非基础功能，作为独立的 component 发布
 
 # v0.3.8   2025-09-18
 
