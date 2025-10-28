@@ -67,6 +67,16 @@ namespace be {
         JSEngineEvalEmbeded(ctx, gpio)
     }
 
+    /**
+     * 设置 GPIO 引脚的模式。
+     *
+     * @module gpio
+     * @function setMode
+     * @param pin:number 引脚号
+     * @param mode:string 引脚模式，支持 input|output|output-od|input-output|input-output-od
+     *
+     * @return undefined
+     */
     JSValue GPIO::setMode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(2)
         ARGV_TO_UINT8(0, pin)
@@ -107,6 +117,16 @@ namespace be {
         return JS_UNDEFINED ;
     }
 
+    /**
+     * 配置 GPIO 引脚的上拉或下拉模式。
+     *
+     * @module gpio
+     * @function pull
+     * @param pin:number 引脚号
+     * @param mode:string 拉力模式，支持 up|down|updown|floating
+     *
+     * @return undefined
+     */
     JSValue GPIO::pull(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(2)
         ARGV_TO_UINT8(0, pin)
@@ -137,6 +157,16 @@ namespace be {
         return JS_UNDEFINED ;
     }
 
+    /**
+     * 写入 GPIO 引脚电平。
+     *
+     * @module gpio
+     * @function write
+     * @param pin:number 引脚号
+     * @param value:number 输出电平，0 或 1
+     *
+     * @return boolean 设置成功返回 true，否则返回 false
+     */
     JSValue GPIO::write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(2)
         ARGV_TO_UINT8(0, pin)
@@ -144,6 +174,15 @@ namespace be {
         return gpio_set_level((gpio_num_t)pin, value)==ESP_OK? JS_TRUE: JS_FALSE ;
     }
 
+    /**
+     * 读取 GPIO 引脚当前电平。
+     *
+     * @module gpio
+     * @function read
+     * @param pin:number 引脚号
+     *
+     * @return number 当前电平值，0 或 1
+     */
     JSValue GPIO::read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(1)
         ARGV_TO_UINT8(0, pin)
@@ -187,6 +226,7 @@ namespace be {
         jsHandler = JS_DupValue(ctx, argv[0]) ;
         return JS_UNDEFINED ;
     }
+    
     JSValue GPIO::apiAddISR(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_ARGC(1)
         ARGV_TO_GPIO(0, pin)
@@ -208,6 +248,7 @@ namespace be {
         }
         return JS_UNDEFINED ;
     }
+    
     JSValue GPIO::apiRemoveISR(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_ARGC(1)
         ARGV_TO_GPIO(0, pin)
@@ -242,15 +283,18 @@ namespace be {
         pending_level_changes.clear() ;
     }
     
+    
     JSValue GPIO::test(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return JS_UNDEFINED ;
     }
 
     /**
-     * 重置 GPIO 引脚到默认状态
-     * 
+     * 重置 GPIO 引脚到默认状态。
+     *
+     * @module gpio
      * @function resetPin
-     * @param pin:number GPIO引脚编号
+     * @param pin:number GPIO 引脚编号
+     *
      * @return undefined
      */
     JSValue GPIO::resetPin(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -274,8 +318,31 @@ namespace be {
 
 
 /**
+ * 监听引脚电平变化并注册回调。
+ *
+ * @module gpio
+ * @function watch
+ * @param pin:number GPIO 引脚号
+ * @param edge:"rising"|"falling"|"both" 触发的边沿类型
+ * @param callback:Function 变化时调用的函数
+ */
+
+
+/**
+ * 取消引脚电平变化的监听。
+ *
+ * @module gpio
+ * @function unwatch
+ * @param gpio:number GPIO 引脚号
+ * @param edge:"rising"|"falling"|"both" 取消的边沿类型
+ * @param callback:Function 要移除的回调函数
+ */
+
+
+/**
  * GPIO 闪烁，执行该函数后，指定的引脚会持续高低电平切换。
  * 
+ * @module gpio
  * @function blink
  * @param pin:number 引脚序号
  * @param time:number 间隔时间，单位毫秒，闪烁的半周期

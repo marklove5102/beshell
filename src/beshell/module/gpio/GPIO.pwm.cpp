@@ -258,8 +258,65 @@ namespace be {
         return JS_UNDEFINED;
     }
 
+    /**
+     * 获取芯片支持的最大 PWM 速度模式值。
+     *
+     * @module gpio
+     * @function pwmMaxSpeedMode
+     *
+     * @return number 最大速度模式
+     */
     JSValue GPIO::pwmMaxSpeedMode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return JS_NewUint32(ctx, LEDC_SPEED_MODE_MAX) ;
     }
 
 }
+
+
+
+/**
+ * 配置指定引脚的 PWM 输出并记录所占用的通道。
+ *
+ * options: {
+ *     mode: number = LEDC_LOW_SPEED_MODE,  // LEDC speed mode
+ *     duty: number = 0,                    // 占空比
+ *     freq: number = 1000,                 // 频率
+ *     channel: number = 0,                 // 通道
+ *     resolution: number = 10,             // 分辨率
+ *     timer: number = 0,                   // 定时器号
+ *     clk: number = LEDC_AUTO_CLK,         // 时钟配置
+ *     intr: number = LEDC_INTR_DISABLE     // 中断配置
+ * }
+ * 
+ * @module gpio
+ * @function configPWM
+ * @param pin:number GPIO 引脚号
+ * @param options:object={} PWM 配置，可包含 mode、channel、freq、duty 等字段
+ */
+
+/**
+ * 写入 PWM 占空比并可选立刻更新硬件状态。
+ *
+ * @module gpio
+ * @function writePWM
+ * @param pin:number GPIO 引脚号
+ * @param value:number 占空比数值
+ * @param update:boolean=true 是否立即调用底层更新
+ */
+
+/**
+ * 手动触发指定引脚的 PWM 占空比更新。
+ *
+ * @module gpio
+ * @function updatePWM
+ * @param pin:number GPIO 引脚号
+ */
+
+/**
+ * 停止引脚的 PWM 输出并释放对应通道。
+ *
+ * @module gpio
+ * @function stopPWM
+ * @param pin:number GPIO 引脚号
+ */
+
