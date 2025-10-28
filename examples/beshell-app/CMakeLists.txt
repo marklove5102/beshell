@@ -11,9 +11,19 @@ set(JS_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/js")
 # js 镜像文件路径
 set(JS_IMG_PATH "${CMAKE_CURRENT_LIST_DIR}/img/js.bin")
 
-set(MKLITTLEFS_PATH "${CMAKE_CURRENT_LIST_DIR}/components/beshell/tools/mklittlefs.exe")
+
+# 设置外部 component 目录
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../components")
+    set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/../components")
+endif()
+
+
+set(MKLITTLEFS_PATH "${CMAKE_CURRENT_LIST_DIR}/../components/beshell/tools/mklittlefs.exe")
 if(NOT EXISTS ${MKLITTLEFS_PATH})
-    set(MKLITTLEFS_PATH "${CMAKE_CURRENT_LIST_DIR}/managed_components/become-cool__beshell/tools/mklittlefs.exe")
+    set(MKLITTLEFS_PATH "${CMAKE_CURRENT_LIST_DIR}/components/beshell/tools/mklittlefs.exe")
+    if(NOT EXISTS ${MKLITTLEFS_PATH})
+        set(MKLITTLEFS_PATH "${CMAKE_CURRENT_LIST_DIR}/managed_components/become-cool__beshell/tools/mklittlefs.exe")
+    endif()
 endif()
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)

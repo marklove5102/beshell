@@ -33,9 +33,9 @@
 
     ![](./doc/install-2.png "用关键词 `beshell` 搜索 component")
 
-3. 点击例子 `basic` 进入页面
+3. 点击例子 `beshell-app` 进入页面
 
-    ![](./doc/install-3.png "点击进入例子 `basic` ")
+    ![](./doc/install-3.png "点击进入例子 `beshell-app` ")
 
 4. 点击页面上的 `Create project from this example`
 

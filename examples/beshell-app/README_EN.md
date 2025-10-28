@@ -1,3 +1,5 @@
+[中文](./README.md)
+
 [BeShell](https://beshell.become.cool) Demo Project
 
 [BeShell](https://beshell.become.cool) is an embedded JavaScript framework that allows developers to build embedded applications using only JavaScript.
@@ -21,19 +23,11 @@ Automatically create an example project from the ESP Component Registry in VSCod
 
 1. Press `Ctrl+Shift+P`, enter the keyword `component`, and select `ESP-IDF: Show ESP Component Registry`
 
-	![](./doc/install-1.png "Press `Ctrl+Shift+P`, enter `component`, and select `ESP-IDF: Show ESP Component Registry`")
+2. Search for the component using the keyword `beshell-mg`
 
-2. Search for the component using the keyword `beshell`
-
-	![](./doc/install-2.png "Search for the component using `beshell`")
-
-3. Click the example `basic` to enter its page
-
-	![](./doc/install-3.png "Click to enter the example `basic`")
+3. Click the example `beshell-mg-app` to enter its page
 
 4. Click `Create project from this example` on the page
-
-	![](./doc/install-4.png "Create project from this example")
 
 5. Browse to the local directory where you want to store the project, and the [ESP-IDF Extension](vscode:extension/espressif.esp-idf-extension) in VSCode will automatically download the project and open it in a new window.
 
