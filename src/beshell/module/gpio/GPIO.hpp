@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../BeShell.hpp"
+#include "../../BeShell.hpp"
 
 namespace be {
  
@@ -35,8 +35,11 @@ namespace be {
 
         static JSValue adcUnitInit(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
         static JSValue adcChannelInit(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+        static JSValue adcChannelRead(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+        static JSValue adcPinInit(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
         static JSValue adcRead(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
         static JSValue adcInfo(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+        static void adcReflectPins();
         
         static JSValue resetPin(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 
