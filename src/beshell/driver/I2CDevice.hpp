@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EventEmitter.hpp"
-#include "module/serial/I2C.hpp"
+#include "module/serial/I2C-legacy.hpp"
 
 
 namespace be::driver {

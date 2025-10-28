@@ -27,7 +27,7 @@
 #include "./repl/REPL.hpp"
 
 // module
-#include "./module/GPIO.hpp"
+#include "./module/gpio/GPIO.hpp"
 #include "./module/NVS.hpp"
 #include "./module/Path.hpp"
 #include "./module/Process.hpp"
@@ -42,9 +42,8 @@
 // serial
 #include "./module/serial/Serial.hpp"
 #include "./module/serial/UART.hpp"
-#include "./module/serial/I2C.hpp"
+#include "./module/serial/I2C-legacy.hpp"
 #include "./module/serial/SPI.hpp"
-#include "./module/serial/I2S.hpp"
 #include "./module/serial/CDC.hpp"
 
 

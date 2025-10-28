@@ -1,9 +1,15 @@
 
+Refact:
+
+* 移除 gpio adc legacy 接口
+
+
 # v1.0.3 2025-10-07
 
 Add:
 
-* example
+* examples
+* gpio.adcReadChannel()
 
 Fix:
 

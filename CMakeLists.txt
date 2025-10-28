@@ -59,7 +59,6 @@ idf_component_register(
         esp_wifi
         efuse
         bt
-        esp_driver_tsens
         ${requires}
 )
 

@@ -1,4 +1,4 @@
-#include "I2C.hpp"
+#include "I2C-legacy.hpp"
 #include "qjs_utils.h"
 #include <JSEngine.hpp>
 
