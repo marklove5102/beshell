@@ -8,8 +8,6 @@
  * 
  * * [SPI](SPI.md)
  * 
- * * [I2S](I2S.md)
- * 
  * 这些类不需要实例化，serial 模块会根据芯片的类型，自动初始化并导出串口类对象。
  * 
  * 不同型号的 ESP32 芯片，所提供的硬件串口外设数量不一样。
@@ -39,9 +37,6 @@
  *     spi0: SPI,
  *     spi1: SPI,
  *     spi2: SPI,
- * 
- *     i2s0: I2S,
- *     i2s1: I2S,
  * }
  * ```
  * 
@@ -53,9 +48,8 @@
  */
 #include "Serial.hpp"
 #include "UART.hpp"
-#include "I2C.hpp"
+#include "I2C-legacy.hpp"
 #include "SPI.hpp"
-#include "I2S.hpp"
 
 
 using namespace std ;
@@ -99,14 +93,6 @@ namespace be {
 
         #if SOC_LP_I2C_NUM > 0
         exportName("i2clp0") ;
-        #endif
-        
-
-        // I2S ---------------
-        exportName("i2s0") ;
-
-        #if SOC_I2S_NUM>1
-        exportName("i2s1") ;
         #endif
 
         // SPI ---------------
@@ -192,20 +178,6 @@ namespace be {
             exportValue("i2clp0", JS_DupValue(ctx,i2clp0->jsobj)) ;
         }
         #endif
-        
-        // I2S ---------------
-        I2S * i2s0 = I2S::flyweight(ctx, I2S_NUM_0) ;
-        if(i2s0) {
-            exportValue("i2s0", JS_DupValue(ctx,i2s0->jsobj)) ;
-        }
-        
-        #if SOC_I2S_NUM>1
-        I2S * i2s1 = I2S::flyweight(ctx, I2S_NUM_1) ;
-        if(i2s1) {
-            exportValue("i2s1", JS_DupValue(ctx,i2s1->jsobj)) ;
-        }
-        #endif
-
 
         // SPI ---------------
         #if SOC_SPI_PERIPH_NUM > 0

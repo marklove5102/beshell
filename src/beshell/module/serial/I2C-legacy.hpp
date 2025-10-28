@@ -8,31 +8,34 @@
 #include "freertos/queue.h"
 #include "./soc_serial.h"
 
+
+#define I2C_BEGIN(addr, act)                                        \
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();                   \
+    i2c_master_start(cmd);                                          \
+    i2c_master_write_byte(cmd, (addr << 1) | I2C_MASTER_##act, 0x1);
+    
+#define I2C_BEGIN_READ(addr)    I2C_BEGIN(addr, READ)
+#define I2C_BEGIN_WRITE(addr)   I2C_BEGIN(addr, WRITE)
+
+#define I2C_COMMIT(bus)                                                     \
+    i2c_master_stop(cmd);                                                   \
+    take() ;                                                                \
+    esp_err_t res=i2c_master_cmd_begin(bus, cmd, 10/portTICK_PERIOD_MS) ;   \
+    give() ;                                                                \
+    i2c_cmd_link_delete(cmd);
+
+#define JSCHECK_MASTER                              \
+    if(that->mode!=I2C_MODE_MASTER) {               \
+        JSTHROW("I2C is not in %s mode", "master") ;\
+    }
+#define JSCHECK_SLAVE                               \
+    if(that->mode!=I2C_MODE_SLAVE) {                \
+        JSTHROW("I2C is not in %s mode", "slave") ; \
+    }
+
+
+    
 namespace be {
-
-    #define I2C_BEGIN(addr, act)                                        \
-        i2c_cmd_handle_t cmd = i2c_cmd_link_create();                   \
-        i2c_master_start(cmd);                                          \
-        i2c_master_write_byte(cmd, (addr << 1) | I2C_MASTER_##act, 0x1);
-        
-    #define I2C_BEGIN_READ(addr)    I2C_BEGIN(addr, READ)
-    #define I2C_BEGIN_WRITE(addr)   I2C_BEGIN(addr, WRITE)
-
-    #define I2C_COMMIT(bus)                                                     \
-        i2c_master_stop(cmd);                                                   \
-        take() ;                                                                \
-        esp_err_t res=i2c_master_cmd_begin(bus, cmd, 10/portTICK_PERIOD_MS) ;   \
-        give() ;                                                                \
-        i2c_cmd_link_delete(cmd);
-
-    #define JSCHECK_MASTER                              \
-        if(that->mode!=I2C_MODE_MASTER) {               \
-            JSTHROW("I2C is not in %s mode", "master") ;\
-        }
-    #define JSCHECK_SLAVE                               \
-        if(that->mode!=I2C_MODE_SLAVE) {                \
-            JSTHROW("I2C is not in %s mode", "slave") ; \
-        }
 
 
     /**
