@@ -1,5 +1,5 @@
 #include "ModuleLoader.hpp"
-#include "module/GPIO.hpp"
+#include "module/gpio/GPIO.hpp"
 #include "module/Process.hpp"
 #include "module/Path.hpp"
 #include "driver/DriverModule.hpp"

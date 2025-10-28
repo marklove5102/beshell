@@ -6,13 +6,6 @@
 #include "qjs_utils.h"
 
 
-#ifdef ESP_PLATFORM
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_vfs_fat.h"
-#include "esp_event_loop.h"
-#endif
-
 using namespace std ;
 
 namespace be {

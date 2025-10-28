@@ -7,7 +7,7 @@
 //#define LOG_LOCAL_LEVEL 4
 
 #include "esp_log.h"
-#include "esp_spi_flash.h"
+#include "spi_flash_mmap.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
@@ -325,7 +325,7 @@ esp_err_t esp_littlefs_format(const char* partition_label) {
             return ESP_FAIL;
         }
         efs->cache_size = CONFIG_LITTLEFS_FD_CACHE_MIN_SIZE;  // Initial size of cache; will resize ondemand
-        efs->cache = calloc(sizeof(*efs->cache), efs->cache_size);
+        efs->cache = calloc(efs->cache_size, sizeof(*efs->cache));
     }
     ESP_LOGV(TAG, "Format Success!");
     
@@ -616,7 +616,10 @@ static esp_err_t esp_littlefs_init(const esp_vfs_littlefs_conf_t* conf)
             goto exit;
         }
         efs->cache_size = 4;
-        efs->cache = calloc(sizeof(*efs->cache), efs->cache_size);
+        /* calloc takes (nmemb, size). The previous call had transposed args
+        * which triggers -Wcalloc-transposed-args. Allocate cache_size elements
+        * each of sizeof(*efs->cache). */
+        efs->cache = calloc(efs->cache_size, sizeof(*efs->cache));
     }
 
     err = ESP_OK;
