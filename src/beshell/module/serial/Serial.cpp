@@ -48,7 +48,7 @@
  */
 #include "Serial.hpp"
 #include "UART.hpp"
-#include "I2C-legacy.hpp"
+#include "I2C.hpp"
 #include "SPI.hpp"
 
 
@@ -62,6 +62,7 @@ namespace be {
         : NativeModule(ctx,name,0)
     {
         // UART ---------------
+#if CONFIG_BESHELL_SERIAL_USE_UART
         exportName("uart0") ;
         
         #if SOC_UART_HP_NUM>1
@@ -83,8 +84,10 @@ namespace be {
         #if SOC_UART_LP_NUM>0
         exportName("uartlp0") ;
         #endif
+#endif
 
         // I2C ---------------
+#if CONFIG_BESHELL_SERIAL_USE_I2C
         exportName("i2c0") ;
 
         #if SOC_I2C_NUM > 1
@@ -94,8 +97,10 @@ namespace be {
         #if SOC_LP_I2C_NUM > 0
         exportName("i2clp0") ;
         #endif
+#endif
 
         // SPI ---------------
+#if CONFIG_BESHELL_SERIAL_USE_SPI
         #if SOC_SPI_PERIPH_NUM>0
         exportName("spi0") ;
         #endif
@@ -111,6 +116,7 @@ namespace be {
         #if SOC_SPI_PERIPH_NUM>3
         exportName("spi3") ;
         #endif
+#endif
 
     }
     
@@ -122,6 +128,7 @@ namespace be {
         assert(m) ;
 
         // UART ---------------
+#if CONFIG_BESHELL_SERIAL_USE_UART
         UART * uart0 = UART::flyweight(ctx, UART_NUM_0) ;
         exportValue("uart0", JS_DupValue(ctx,uart0->jsobj)) ;
 
@@ -159,9 +166,11 @@ namespace be {
             exportValue("uartlp0", JS_DupValue(ctx,uartlp0->jsobj)) ;
         }
         #endif
+#endif
 
 
         // I2C ---------------        
+#if CONFIG_BESHELL_SERIAL_USE_I2C
         I2C * i2c0 = I2C::flyweight(ctx, I2C_NUM_0) ;
         exportValue("i2c0", JS_DupValue(ctx,i2c0->jsobj)) ;
 
@@ -178,8 +187,10 @@ namespace be {
             exportValue("i2clp0", JS_DupValue(ctx,i2clp0->jsobj)) ;
         }
         #endif
+#endif
 
         // SPI ---------------
+#if CONFIG_BESHELL_SERIAL_USE_SPI
         #if SOC_SPI_PERIPH_NUM > 0
         SPI * spi0 = SPI::flyweight(ctx, SPI1_HOST) ;
         if(spi0) {
@@ -207,6 +218,7 @@ namespace be {
             exportValue("spi3", spi3->jsobj) ;
         }
         #endif
+#endif
     }
     
 }

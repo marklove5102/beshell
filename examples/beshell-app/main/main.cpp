@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include <beshell/BeShell.hpp>
-#include <beshell-mg/Mg.hpp>
 
 using namespace std ;
 using namespace be ;
-using namespace be::mg ;
 
 
 #ifdef __cplusplus
@@ -27,9 +25,6 @@ void app_main(void)
     // beshell.use<CDC>() ;
     beshell.use<TelnetCDC>() ;
 #endif
-
-    beshell.use<Mg>() ;
-
 
     // 挂载 js 分区到文件的根目录
     FS::mount("/", new LittleFS("js", true)) ;

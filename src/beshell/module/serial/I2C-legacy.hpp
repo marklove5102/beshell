@@ -1,4 +1,5 @@
 #pragma once
+#if BESHELL_SERIAL_I2C_USE_LEGACY
 
 #include "../../NativeClass.hpp"
 #include "driver/i2c.h"
@@ -388,3 +389,5 @@ namespace be {
 }
 
 class TwoWire : public be::I2C {} ;
+
+#endif

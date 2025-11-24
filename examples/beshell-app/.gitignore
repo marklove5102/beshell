@@ -7,3 +7,4 @@ dependencies.lock
 CMakeLists.update_example.txt
 .cache
 .devcontainer
+img/js.bin

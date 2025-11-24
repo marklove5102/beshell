@@ -328,6 +328,7 @@ void nofreeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
 #define GET_UINT8_PROP(obj, propName, cvar, excp)       GET_INTEGER_PROP(obj, propName, cvar, uint8_t, uint32_t, JS_ToUint32, excp)
 #define GET_UINT16_PROP(obj, propName, cvar, excp)      GET_INTEGER_PROP(obj, propName, cvar, uint16_t, uint32_t, JS_ToUint32, excp)
 #define GET_UINT32_PROP(obj, propName, cvar, excp)      GET_INTEGER_PROP(obj, propName, cvar, uint32_t, uint32_t, JS_ToUint32, excp)
+#define GET_BOOL_PROP(obj, propName, cvar, excp)        GET_INT_PROP(obj, propName, cvar, bool, excp)
 #define GET_GPIO_PROP(obj, propName, cvar, excp)        GET_INT_PROP(obj, propName, cvar, gpio_num_t, excp)
 
 
@@ -407,7 +408,9 @@ void nofreeArrayBuffer(JSRuntime *rt, void *opaque, void *ptr) ;
     cvar = default ;                                                                    \
     if(!JS_IsUndefined(obj)&&!JS_IsNull(obj)) {                                         \
         JSValue jsvar = JS_GetPropertyStr(ctx, obj, propName) ;                         \
-        cvar = JS_ToBool(ctx, jsvar) ;                                                  \
+        if(!JS_IsUndefined(jsvar)) {                                                    \
+            cvar = JS_ToBool(ctx, jsvar) ;                                              \
+        }                                                                               \
         JS_FreeValue(ctx, jsvar) ;                                                      \
     }
 

@@ -3,40 +3,54 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "esp_log.h"
+#include <functional>
+#include <utility>
+
+namespace {
+    struct RunOnCoreContext {
+        std::function<void()> func;
+        SemaphoreHandle_t doneSemaphore;
+    };
+
+    constexpr char TAG[] = "be.thread";
+}
 
 // 函数执行的任务
 static void run_lambda_on_core(void *params) {
-    // 解包传入的参数（包含信号量和函数）
-    auto data = (std::pair<std::function<void()>, SemaphoreHandle_t>*)params;
-    auto func = data->first;                   // lambda 函数
-    SemaphoreHandle_t doneSemaphore = data->second; // 信号量
-
-    // 执行 lambda 函数
-    func();
-
-    // 释放信号量，表示任务已完成
-    xSemaphoreGive(doneSemaphore);
-
-    // 删除任务
-    vTaskDelete(NULL);
+    auto *ctx = static_cast<RunOnCoreContext*>(params);
+    ctx->func();
+    xSemaphoreGive(ctx->doneSemaphore);
+    vTaskDelete(nullptr);
 }
 
 void run_wait_on_core (std::function<void()> func, uint8_t core_id) {
-    // 创建信号量
-    SemaphoreHandle_t doneSemaphore = xSemaphoreCreateBinary();
+    StaticSemaphore_t doneSemaphoreBuffer;
+    SemaphoreHandle_t doneSemaphore = xSemaphoreCreateBinaryStatic(&doneSemaphoreBuffer);
 
-    // 将 lambda 和信号量打包到一起
-    auto params = new std::pair<std::function<void()>, SemaphoreHandle_t>(func, doneSemaphore);
+    if(doneSemaphore == nullptr) {
+        ESP_LOGE(TAG, "无法创建同步信号量，直接在当前核心执行");
+        func();
+        return;
+    }
 
-    // 创建绑定到指定 CPU 核心的任务
-    xTaskCreatePinnedToCore(run_lambda_on_core, "lambdaTask", 2048, params, 5, NULL, (BaseType_t)core_id);
+    RunOnCoreContext ctx{ std::move(func), doneSemaphore };
 
-    // 等待信号量释放（等待任务完成）
-    xSemaphoreTake(doneSemaphore, portMAX_DELAY);
+    BaseType_t created = xTaskCreatePinnedToCore(
+        run_lambda_on_core,
+        "lambdaTask",
+        4096,
+        &ctx,
+        5,
+        nullptr,
+        static_cast<BaseType_t>(core_id)
+    );
 
-    // 删除信号量
+    if(created == pdPASS) {
+        xSemaphoreTake(doneSemaphore, portMAX_DELAY);
+    } else {
+        ESP_LOGE(TAG, "创建 lambdaTask 失败(%ld)，在当前核心回退执行", static_cast<long>(created));
+        ctx.func();
+    }
+
     vSemaphoreDelete(doneSemaphore);
-
-    // 释放参数内存
-    delete params;
 }

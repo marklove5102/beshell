@@ -1,3 +1,5 @@
+#if BESHELL_SERIAL_I2C_USE_LEGACY
+
 #include "I2C-legacy.hpp"
 #include "hal/i2c_types.h"
 #include "qjs_utils.h"
@@ -473,3 +475,4 @@ namespace be {
 
 }
 
+#endif
