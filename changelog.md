@@ -1,8 +1,15 @@
-# v1.0.4 2025-11-25
+# v1.0.5 2025-11-25
+
+Fix:
+
+* vscode 环境下从 exmaples/beshell-app 自动创建工程，第一次编译会因为找不到 mklittlefs 导致失败
+
+# v1.0.4 2025-11-24
 
 Refact:
 
 * 移除 gpio adc legacy 接口
+* 实现了 ng 驱动的 i2c 接口
 
 
 # v1.0.3 2025-10-07

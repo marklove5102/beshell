@@ -26,7 +26,7 @@ elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../components/beshell/tools/mklittlefs.
     set(MKLITTLEFS_PATH "${CMAKE_CURRENT_LIST_DIR}/../components/beshell/tools/mklittlefs.exe")
 elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/components/beshell/tools/mklittlefs.exe")
     set(MKLITTLEFS_PATH "${CMAKE_CURRENT_LIST_DIR}/components/beshell/tools/mklittlefs.exe")
-elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/managed_components/become-cool__beshell/tools/mklittlefs.exe")
+else()
     set(MKLITTLEFS_PATH "${CMAKE_CURRENT_LIST_DIR}/managed_components/become-cool__beshell/tools/mklittlefs.exe")
 endif()
 
