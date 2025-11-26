@@ -76,6 +76,7 @@ target_link_options(${COMPONENT_TARGET} PRIVATE "-Wl,--no-warn-common")
 
 # quickjs version
 file(READ "${COMPONENT_DIR}/src/beshell/deps/quickjs/VERSION" QJS_VERSION_CONTENT)
+string(STRIP QJS_VERSION_CONTENT QJS_VERSION_CONTENT)
 add_definitions(-DCONFIG_QUICKJS_VERSION="${QJS_VERSION_CONTENT}")
 
 
