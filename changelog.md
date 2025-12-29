@@ -29,6 +29,29 @@ Refact:
 * 移除了 mg、lvgl、sqlite 等依赖第三方库的代码，作为独立的 component 发布
 * 移除了大量驱动代码、ota 等非基础功能，作为独立的 component 发布
 
+# v0.3.10   2025-12-29
+
+New Feature:
+
+* add serial.uart.unsetup()
+
+
+# v0.3.9   2025-09-30
+
+New Feature:
+
+* mg.addDNSCache()
+* mg.removeDNSCache()
+* mg.clearDNSCache()
+* ota module compatible with Flash encryption mode
+* gpio adc functions
+
+
+Fixed:
+
+* mg.download() catch the exceptions of the callback function
+
+
 # v0.3.8   2025-09-18
 
 * bt.setPower() add arg `type`
