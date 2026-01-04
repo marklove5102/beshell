@@ -17,6 +17,7 @@ namespace be{
         exportName("ws") ;
         exportName("ble") ;
         exportName("cdc") ;
+        exportName("mqtt") ;
         exportName("startLog") ;
         exportName("stopLog") ;
         
