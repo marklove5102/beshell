@@ -29,6 +29,12 @@ Refact:
 * 移除了 mg、lvgl、sqlite 等依赖第三方库的代码，作为独立的 component 发布
 * 移除了大量驱动代码、ota 等非基础功能，作为独立的 component 发布
 
+New Feature:
+
+* + sync, ping, pong 协议
+* + telnet MQTT 协议
+
+
 # v0.3.10   2025-12-29
 
 New Feature:
