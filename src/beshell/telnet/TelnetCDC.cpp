@@ -105,7 +105,6 @@ namespace be {
                 chunk_size = datalen > buffsize ? buffsize : datalen;
 
                 // 当没有上位机连接时，数据会在缓冲区等待，此时等待数据发送完成是无效的
-                // 第1个chunk遇到缓冲满，取消发送；后续chunk等待5ms
                 int sentlen = usb_serial_jtag_write_bytes(chunk, chunk_size, 2/portTICK_PERIOD_MS);
                 if(sentlen!=chunk_size) {
                     return ;

@@ -16,7 +16,7 @@ namespace be {
         uint32_t rx_buffer_size = 0;
         uint32_t tx_buffer_size = 0;
 
-        static void taskListen(TelnetCDC * argv) ;
+        static void taskListen(TelnetCDC * cdc) ;
 
     public:
         using TelnetChannel::TelnetChannel ;
