@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "qjs_utils.h"
 #include <iostream>
+#include <cstring>
 
 using namespace std ;
 
@@ -152,9 +153,10 @@ namespace be {
     }
 
     bool NVS::readFloat(const char * key, float & value, const char * ns) {
-        int32_t ival = * (int32_t*)&value ;
+        int32_t ival = 0;
         if(readInt32(key, ival, ns)){
-            value = * (float*)&ival ;
+            static_assert(sizeof(float) == sizeof(int32_t), "float size mismatch");
+            std::memcpy(&value, &ival, sizeof(value));
             return true ;
         }
         else {
@@ -162,14 +164,17 @@ namespace be {
         }
     }
     bool NVS::writeFloat(const char * key, float value, const char * ns) {
-        int32_t ival = * (int32_t*)&value ;
+        static_assert(sizeof(float) == sizeof(int32_t), "float size mismatch");
+        int32_t ival = 0;
+        std::memcpy(&ival, &value, sizeof(value));
         return writeInt32(key, ival, ns) ;
     }
     
     bool NVS::readDouble(const char * key, double & value, const char * ns) {
-        int64_t ival = * (int64_t*)&value ;
+        int64_t ival = 0;
         if(readInt64(key, ival, ns)){
-            value = * (double*)&ival ;
+            static_assert(sizeof(double) == sizeof(int64_t), "double size mismatch");
+            std::memcpy(&value, &ival, sizeof(value));
             return true ;
         }
         else {
@@ -177,7 +182,9 @@ namespace be {
         }
     }
     bool NVS::writeDouble(const char * key, double value, const char * ns) {
-        int64_t ival = * (int64_t*)&value ;
+        static_assert(sizeof(double) == sizeof(int64_t), "double size mismatch");
+        int64_t ival = 0;
+        std::memcpy(&ival, &value, sizeof(value));
         return writeInt64(key, ival, ns) ;
     }
 
