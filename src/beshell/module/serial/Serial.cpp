@@ -50,6 +50,7 @@
 #include "UART.hpp"
 #include "I2C.hpp"
 #include "SPI.hpp"
+#include <driver/uart.h>
 
 
 using namespace std ;

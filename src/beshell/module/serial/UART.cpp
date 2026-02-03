@@ -4,12 +4,17 @@
 #include <BeShell.hpp>
 #include <JSEngine.hpp>
 #include <driver/gpio.h>
+#include <driver/uart.h>
 
 using namespace std ;
 
 #define RX_BUF_SIZE 1024
 
 namespace be{
+
+    static inline uart_port_t to_uart_port(int port) {
+        return static_cast<uart_port_t>(port);
+    }
     
     UART * UART::uart0 = nullptr ;
     #if SOC_UART_HP_NUM>1
@@ -37,7 +42,7 @@ namespace be{
         JS_CFUNC_DEF("listen", 0, UART::listen),
     } ;
 
-    UART::UART(JSContext * ctx, uart_port_t uartNum)
+    UART::UART(JSContext * ctx, int uartNum)
         : NativeClass(ctx,build(ctx))
         , m_uartNum(uartNum)
     {}
@@ -49,7 +54,7 @@ namespace be{
             }                                   \
             return var ;                        \
         }
-    UART * UART::flyweight(JSContext * ctx, uart_port_t bus) {
+    UART * UART::flyweight(JSContext * ctx, int bus) {
         DEFINE_BUS(UART_NUM_0, uart0)
         #if SOC_UART_HP_NUM>1
         else DEFINE_BUS(UART_NUM_1, uart1)
@@ -69,7 +74,7 @@ namespace be{
         return nullptr ;
     }
 
-    uart_port_t UART::uartNum() const {
+    int UART::uartNum() const {
         return m_uartNum ;
     }
 
@@ -99,7 +104,7 @@ namespace be{
     JSValue UART::setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(UART, uart)
 
-        if(uart_is_driver_installed(uart->m_uartNum)) {
+        if(uart_is_driver_installed(to_uart_port(uart->m_uartNum))) {
             JSTHROW("uart%d driver already installed",uart->m_uartNum)
         }
 
@@ -114,7 +119,7 @@ namespace be{
 
         // dn3(baudrate,stopbits,parity)
 
-        esp_err_t ret = uart_driver_install(uart->m_uartNum, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
+        esp_err_t ret = uart_driver_install(to_uart_port(uart->m_uartNum), RX_BUF_SIZE * 2, 0, 0, NULL, 0);
         if(ret!=0) {
             JSTHROW("uart setup failded(%s:%d)","install", ret)
         }
@@ -140,12 +145,12 @@ namespace be{
             .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
             .source_clk = UART_SCLK_DEFAULT,
         };
-        ret = uart_param_config(uart->m_uartNum, &uart_config) ;
+        ret = uart_param_config(to_uart_port(uart->m_uartNum), &uart_config) ;
         if(ret!=0) {
             JSTHROW("uart setup failded(%s:%d)","config", ret)
         }
         
-        ret = uart_set_pin(uart->m_uartNum, tx, rx, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+        ret = uart_set_pin(to_uart_port(uart->m_uartNum), tx, rx, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
         if(ret!=0) {
             JSTHROW("uart setup failded(%s:%d)","setpin", ret)
         }
@@ -175,7 +180,7 @@ namespace be{
         if(!buff) {
             JSTHROW("out of memory?")
         }
-        int readlen = uart_read_bytes(uart->m_uartNum, buff, len, timeout / portTICK_PERIOD_MS);
+        int readlen = uart_read_bytes(to_uart_port(uart->m_uartNum), buff, len, timeout / portTICK_PERIOD_MS);
         return JS_NewArrayBuffer(ctx, buff, readlen, freeArrayBuffer, NULL, false) ;
     }
 
@@ -190,7 +195,7 @@ namespace be{
 
         // ArrayBuffer
         if(buff) {
-            const int txBytes = uart_write_bytes(uart->m_uartNum, buff, length);
+            const int txBytes = uart_write_bytes(to_uart_port(uart->m_uartNum), buff, length);
             return JS_NewInt32(ctx, txBytes) ;
         }
 
@@ -198,7 +203,7 @@ namespace be{
         else if(JS_IsArray(ctx, argv[0])) {
             buff = JS_ArrayToBufferUint8(ctx, argv[0], (int *)&length) ;
             if(length && buff) {
-                const int txBytes = uart_write_bytes(uart->m_uartNum, buff, length);
+                const int txBytes = uart_write_bytes(to_uart_port(uart->m_uartNum), buff, length);
                 free(buff) ;
                 return JS_NewInt32(ctx, txBytes) ;
             } else {
@@ -210,7 +215,7 @@ namespace be{
         // string
         else {
             ARGV_TO_CSTRING_LEN(0, buff, length)
-            const int txBytes = uart_write_bytes(uart->m_uartNum, buff, length);
+            const int txBytes = uart_write_bytes(to_uart_port(uart->m_uartNum), buff, length);
             JS_FreeCString(ctx, (const char *)buff) ;
             return JS_NewInt32(ctx, txBytes) ;
         }
@@ -227,7 +232,7 @@ namespace be{
         uint8_t buff [32];
         uart_chunk_t chunk ;
         while(1) {
-            chunk.len = uart_read_bytes(uart->uartNum(), buff, sizeof(buff), 1);
+            chunk.len = uart_read_bytes(to_uart_port(uart->uartNum()), buff, sizeof(buff), 1);
             if(chunk.len) {
                 chunk.data = (uint8_t *)malloc(chunk.len) ;
                 memcpy(chunk.data, buff, chunk.len) ;
@@ -259,7 +264,7 @@ namespace be{
     JSValue UART::listen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(UART, uart)
         
-        if(!uart_is_driver_installed(uart->m_uartNum)) {
+        if(!uart_is_driver_installed(to_uart_port(uart->m_uartNum))) {
             JSTHROW("uart%d driver not installed, call setup() first",uart->m_uartNum)
         }
 
@@ -312,11 +317,11 @@ namespace be{
             uart->listener = JS_NULL ;
         }
 
-        uart_driver_delete(uart->m_uartNum) ;
+        uart_driver_delete(to_uart_port(uart->m_uartNum)) ;
         return JS_UNDEFINED ;
     }
     JSValue UART::isInstalled(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(UART, uart)
-        return uart_is_driver_installed(uart->m_uartNum)? JS_TRUE : JS_FALSE ;
+        return uart_is_driver_installed(to_uart_port(uart->m_uartNum))? JS_TRUE : JS_FALSE ;
     }
 }

@@ -1,11 +1,12 @@
 #pragma once
 
 #include "../../NativeClass.hpp"
-#include "driver/uart.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "./soc_serial.h"
+
+
 
 namespace be{
     class UART: public be::NativeClass {
@@ -13,7 +14,7 @@ namespace be{
     private:
         static std::vector<JSCFunctionListEntry> methods ;
 
-        uart_port_t m_uartNum ;
+        int m_uartNum ;
         
         static UART * uart0 ;
         #if SOC_UART_HP_NUM>1
@@ -39,11 +40,11 @@ namespace be{
         static void loop(JSContext * ctx, void * opaque) ;
 
     public:
-        UART(JSContext * ctx, uart_port_t port) ;
+        UART(JSContext * ctx, int port) ;
 
-        static UART * flyweight(JSContext *, uart_port_t) ;
+        static UART * flyweight(JSContext *, int) ;
 
-        uart_port_t uartNum() const ;
+        int uartNum() const ;
 
         static JSValue setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
         static JSValue unsetup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;

@@ -1,3 +1,25 @@
+
+# v1.0.6 2026/2/3
+
+New Feature:
+
+* + serial.uart.unsetup()
+* + telnet sync, ping, pong 协议
+* + ota.start() 参数 opt.downloader
+* 支持在 sdkconfig 中取消 CONFIG_ESP_WIFI_SOFTAP_SUPPORT 以节省 sram
+
+Fix:
+
+* mg.download() catch the exceptions of the callback function
+* fixed bug for bt.central.connect()
+* fixed: js-to-c.js 路径
+* fixed: telnet cdc delay
+* fixed: "bt queue full" 刷屏
+* fixed: telnet cdc output
+* uart.unsetup() 清除所有资源
+* quickjs/VERSION 文件中多余的换行符会造成项目生成错误
+
+
 # v1.0.5 2025-11-25
 
 Fix:

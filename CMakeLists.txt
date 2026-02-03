@@ -48,6 +48,7 @@ idf_component_register(
     INCLUDE_DIRS
         ./src
     PRIV_REQUIRES
+        esp_partition
         driver
         mbedtls
         vfs
@@ -58,7 +59,6 @@ idf_component_register(
         nvs_flash
         esp_wifi
         efuse
-        bt
         ${requires}
 )
 
