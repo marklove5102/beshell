@@ -101,6 +101,35 @@ namespace be {
         partition->mount(point.c_str()) ;
 #endif
     }
+
+    bool FS::unmount(const char * mountPoint) {
+#ifdef ESP_PLATFORM
+        string point = toVFSPath(mountPoint) ;
+        auto it = partitions.find(point) ;
+        if(it == partitions.end()) {
+            return false ;
+        }
+        it->second->unmount() ;
+        return true ;
+#else
+        (void) mountPoint ;
+        return false ;
+#endif
+    }
+
+    bool FS::remount(const char * mountPoint) {
+#ifdef ESP_PLATFORM
+        string point = toVFSPath(mountPoint) ;
+        auto it = partitions.find(point) ;
+        if(it == partitions.end()) {
+            return false ;
+        }
+        return it->second->mount(point.c_str()) ;
+#else
+        (void) mountPoint ;
+        return false ;
+#endif
+    }
     
 
     void FS::setPrefix(const char * path) {

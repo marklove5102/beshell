@@ -62,6 +62,8 @@ namespace be {
         static const char * trimVFSPath(const char * path) ;
 
         static void mount(const char * mountPoint, FSPartition * partition) ;
+        static bool unmount(const char * mountPoint) ;
+        static bool remount(const char * mountPoint) ;
         static void unmountAll() ;
 
         static bool setCwd(const std::string &) ;
