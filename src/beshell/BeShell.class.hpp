@@ -43,6 +43,7 @@ namespace be {
                 pair.first(*this, pair.second) ;
             }
         }
+        void evalMain(const char * mainScriptPath) ;
         void run() ;
         void main(const char * mainScriptPath=nullptr) ;
 

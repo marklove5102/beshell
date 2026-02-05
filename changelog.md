@@ -2,7 +2,7 @@
 New Feature:
 
 + FS::unmount()/FS::remount()
-
++ BeShell::evalMain()
 
 # v1.0.6 2026/2/3
 

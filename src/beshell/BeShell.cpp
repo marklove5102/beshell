@@ -77,9 +77,8 @@ namespace be {
         }
     }
 
-    void BeShell::main(const char * mainScriptPath) {
-        setup() ;
-        
+    void BeShell::evalMain(const char * mainScriptPath) {
+
         char mainRunPath[256] = {0} ;
         if( NVS::readString("main-run", mainRunPath, sizeof(mainRunPath)-1)==0 ){
             NVS::erase("main-run") ;
@@ -135,7 +134,11 @@ namespace be {
 
             engine->evalScript(mainScriptPath) ;
         }
+    }
 
+    void BeShell::main(const char * mainScriptPath) {
+        setup() ;
+        evalMain(mainScriptPath) ;
         run() ;
     }
 }
