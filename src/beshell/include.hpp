@@ -19,7 +19,6 @@
 // telnet/repl
 #include "./telnet/Protocal.hpp"
 #include "./telnet/TelnetChannel.hpp"
-#include "./telnet/TelnetBLE.hpp"
 #include "./telnet/TelnetSerial.hpp"
 #include "./telnet/TelnetStdIO.hpp"
 #include "./telnet/TelnetCDC.hpp"
@@ -34,11 +33,6 @@
 #include "./module/WiFi.hpp"
 #include "./module/Flash.hpp"
 #include "./module/logger/Logger.hpp"
-#if CONFIG_BT_BLUEDROID_ENABLED
-#include "./module/bt/BT.hpp"
-#elif CONFIG_BT_NIMBLE_ENABLED
-#include "./module/nimble/NimBLE.hpp"
-#endif
 // serial
 #include "./module/serial/Serial.hpp"
 #include "./module/serial/UART.hpp"

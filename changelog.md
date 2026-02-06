@@ -1,8 +1,12 @@
 
-New Feature:
+# v1.0.7 2026/2/6
 
 + FS::unmount()/FS::remount()
 + BeShell::evalMain()
+
+Reflect:
+
+- 移除 BT 到独立的 component:  beshell-bt
 
 # v1.0.6 2026/2/3
 

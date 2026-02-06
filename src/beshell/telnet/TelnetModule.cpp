@@ -15,7 +15,6 @@ namespace be{
     {
         exportClass<TelnetChannelNClass>() ;
         exportName("ws") ;
-        exportName("ble") ;
         exportName("cdc") ;
         exportName("mqtt") ;
         exportName("startLog") ;
@@ -25,6 +24,10 @@ namespace be{
         EXPORT_FUNCTION(disableCrypto) ;
         EXPORT_FUNCTION(setCryptoKey) ;
         EXPORT_FUNCTION(setPassword) ;
+    }
+
+    void TelnetModule::registerExportor(NativeModuleExportorFunc func) {
+        exportors.push_back(func) ;
     }
 
     void TelnetModule::exports(JSContext *ctx) {

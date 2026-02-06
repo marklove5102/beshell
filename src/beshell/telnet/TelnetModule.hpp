@@ -18,6 +18,7 @@ namespace be{
         static char const * const name ;
 
         TelnetModule(JSContext * ctx, const char * name) ;
+        static void registerExportor(NativeModuleExportorFunc func) ;
 
         static JSValue enableCrypto(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
         static JSValue disableCrypto(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;

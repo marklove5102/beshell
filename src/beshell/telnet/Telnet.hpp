@@ -9,7 +9,6 @@
 #include "freertos/queue.h"
 
 #include "TelnetSerial.hpp"
-#include "TelnetBLE.hpp"
 #endif 
 #ifdef LINUX_PLATFORM
 #include "TelnetStdIO.hpp"
@@ -29,7 +28,7 @@ namespace be {
         
 #ifdef ESP_PLATFORM
         TelnetSerial channelSeiral ;
-        TelnetBLE * channelBLE = nullptr ;
+        TelnetChannel * channelBLE = nullptr ;
 #endif
 #ifdef LINUX_PLATFORM
         TelnetStdIO channelStdIO ;
@@ -72,6 +71,7 @@ namespace be {
         static std::unique_ptr<std::ostream> createStream(Package & pkg) ;
 
         TelnetChannel * channel(const char * name) ;
+        void setBLEChannel(TelnetChannel * ch) ;
 
         void addChannel(TelnetChannel * ch) ;
         void removeChannel(TelnetChannel * ch) ;

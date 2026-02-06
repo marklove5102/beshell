@@ -190,6 +190,15 @@ namespace be {
 #endif
         return nullptr ;
     }
+    void Telnet::setBLEChannel(TelnetChannel * ch) {
+        if(channelBLE) {
+            removeChannel(channelBLE) ;
+        }
+        channelBLE = ch ;
+        if(channelBLE) {
+            addChannel(channelBLE) ;
+        }
+    }
     void Telnet::openFile(TelnetChannel * ch, std::unique_ptr<Package> & pkg, bool append) {
         
         if( pkg->body()[pkg->body_len-1]!=0 ) {
