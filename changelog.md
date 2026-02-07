@@ -3,6 +3,7 @@
 
 + FS::unmount()/FS::remount()
 + BeShell::evalMain()
++ GPIO 连续模式
 
 Reflect:
 

@@ -43,6 +43,10 @@ namespace be {
         exportFunction("readAnalog", adcRead, 1);
         exportFunction("adcChannelRead", adcChannelRead, 1);
         exportFunction("adcInfo", adcInfo, 0);
+        exportFunction("adcContinuousStart", adcContinuousStart, 1);
+        exportFunction("adcContinuousRead", adcContinuousRead, 2);
+        exportFunction("adcContinuousStop", adcContinuousStop, 1);
+        exportFunction("adcContinuousSetCallback", adcContinuousSetCallback, 2);
 
         // for PWM
         exportFunction("apiConfigPWM", apiConfigPWM, 0);
@@ -61,6 +65,7 @@ namespace be {
         GPIO::adcReflectPins();
 
         JSEngine::fromJSContext(ctx)->addLoopFunction(GPIO::loop, nullptr, true, 0);
+        JSEngine::fromJSContext(ctx)->addLoopFunction(GPIO::adcContinuousLoop, nullptr, true, 0);
     }
 
     void GPIO::exports(JSContext *ctx) {

@@ -39,6 +39,11 @@ namespace be {
         static JSValue adcPinInit(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
         static JSValue adcRead(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
         static JSValue adcInfo(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+        static JSValue adcContinuousStart(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+        static JSValue adcContinuousRead(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+        static JSValue adcContinuousStop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+        static JSValue adcContinuousSetCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
+        static void adcContinuousLoop(JSContext *ctx, void * arg) ;
         static void adcReflectPins();
         
         static JSValue resetPin(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
