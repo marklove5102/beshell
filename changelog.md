@@ -1,13 +1,14 @@
 
 # v1.0.7 2026/2/6
 
-+ FS::unmount()/FS::remount()
-+ BeShell::evalMain()
-+ GPIO 连续模式
+* + FS::unmount()/FS::remount()
+* + BeShell::evalMain()
+* + GPIO 连续模式
 
 Reflect:
 
-- 移除 BT 到独立的 component:  beshell-bt
+* - 移除 BT 到独立的 component:  beshell-bt
+* 将 gpio 的 pwm 和 adc 系列api函数放到 gpio.pwm 和 gpio.adc 对象中
 
 # v1.0.6 2026/2/3
 

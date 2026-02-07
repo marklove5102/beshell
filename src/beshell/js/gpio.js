@@ -122,14 +122,30 @@ function unwatch(gpio, edge, callback) {
     }
 }
 
-exportValue(gpio, "configPWM", configPWM)
-exportValue(gpio, "writePWM", writePWM)
-exportValue(gpio, "updatePWM", updatePWM)
-exportValue(gpio, "stopPWM", stopPWM)
+const pwm = {
+    config: configPWM,
+    write: writePWM,
+    update: updatePWM,
+    stop: stopPWM,
+    maxSpeedMode: gpio.pwmMaxSpeedMode,
+}
+
+exportValue(gpio, "pwm", pwm)
 exportValue(gpio, "blink", blink)
 exportValue(gpio, "watch", watch)
 exportValue(gpio, "unwatch", unwatch)
-exportValue(gpio, "adcContinuousStart", gpio.adcContinuousStart)
-exportValue(gpio, "adcContinuousRead", gpio.adcContinuousRead)
-exportValue(gpio, "adcContinuousStop", gpio.adcContinuousStop)
-exportValue(gpio, "adcContinuousSetCallback", gpio.adcContinuousSetCallback)
+
+const adc = {
+    initUnit: gpio.adcUnitInit,
+    initChannel: gpio.adcChannelInit,
+    initPin: gpio.adcPinInit,
+    read: gpio.adcRead,
+    readChannel: gpio.adcChannelRead,
+    info: gpio.adcInfo,
+    startCont: gpio.adcContinuousStart,
+    readCont: gpio.adcContinuousRead,
+    stopCont: gpio.adcContinuousStop,
+    setContCallback: gpio.adcContinuousSetCallback,
+}
+
+exportValue(gpio, "adc", adc)
