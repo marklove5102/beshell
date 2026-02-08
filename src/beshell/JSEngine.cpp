@@ -220,7 +220,7 @@ namespace be {
         return (JSEngine *)JS_GetRuntimeOpaque2(rt) ;
     }
 
-    void JSEngine::print(JSValue content, int pkgId, uint8_t cmd, TelnetChannel * ch) {
+    void JSEngine::print(JSValue content, int pkgId, uint8_t cmd, REPLChannel * ch) {
         assert(beshell) ;
 
         std::string str = console->stringify(ctx, content) ;
@@ -230,14 +230,14 @@ namespace be {
         }
         if(ch) {
             ch->send(str.c_str(), str.length(), pkgId, cmd) ;
-        } else if(beshell->telnet) {
-            beshell->telnet->output(str.c_str(), str.length(), pkgId, cmd) ;
+        } else if(beshell->repl) {
+            beshell->repl->output(str.c_str(), str.length(), pkgId, cmd) ;
         } else {
             cout << str ;
         }
     }
 
-    void JSEngine::dumpError(int pkgId, TelnetChannel * ch) {
+    void JSEngine::dumpError(int pkgId, REPLChannel * ch) {
         JSValue excep = JS_GetException(ctx);
         if(JS_IsNull(excep) || JS_IsUndefined(excep)) {
             return ;
@@ -246,8 +246,8 @@ namespace be {
         string str = getExceptionStr(ctx, excep) ;
         if(ch) {
             ch->send(str.c_str(), str.length(), pkgId, EXCEPTION) ;
-        } else if(beshell->telnet) {
-            beshell->telnet->output(str.c_str(), str.length(), pkgId, EXCEPTION) ;
+        } else if(beshell->repl) {
+            beshell->repl->output(str.c_str(), str.length(), pkgId, EXCEPTION) ;
         }
 
         JS_FreeValue(ctx, excep);

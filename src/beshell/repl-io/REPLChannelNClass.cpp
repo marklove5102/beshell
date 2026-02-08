@@ -1,5 +1,5 @@
-#include "TelnetChannelNClass.hpp"
-#include "TelnetChannel.hpp"
+#include "REPLChannelNClass.hpp"
+#include "REPLChannel.hpp"
 #include "BeShell.class.hpp"
 #include <cstdint>
 
@@ -7,36 +7,36 @@ using namespace std ;
 
 namespace be {
 
-    DEFINE_NCLASS_META_NAME(TelnetChannelNClass, EventEmitter, "TelnetChannel")
-    std::vector<JSCFunctionListEntry> TelnetChannelNClass::methods = {
-        JS_CFUNC_DEF("process", 0, TelnetChannelNClass::process),
-        JS_CFUNC_DEF("enableEventOutput", 0, TelnetChannelNClass::enableEventOutput),
+    DEFINE_NCLASS_META_NAME(REPLChannelNClass, EventEmitter, "REPLChannel")
+    std::vector<JSCFunctionListEntry> REPLChannelNClass::methods = {
+        JS_CFUNC_DEF("process", 0, REPLChannelNClass::process),
+        JS_CFUNC_DEF("enableEventOutput", 0, REPLChannelNClass::enableEventOutput),
     } ;
 
-    TelnetChannelNClass::TelnetChannelNClass(JSContext * ctx, JSValue _jsobj)
+    REPLChannelNClass::REPLChannelNClass(JSContext * ctx, JSValue _jsobj)
         : EventEmitter(ctx,build(ctx,_jsobj))
-        , TelnetChannel(JSEngine::fromJSContext(ctx)->beshell->telnet)
+        , REPLChannel(JSEngine::fromJSContext(ctx)->beshell->repl)
         , parser([this](std::unique_ptr<Package> pkg, void * opaque) {
-            assert(telnet) ;
-            telnet->onReceived(this, std::move(pkg)) ;
+            assert(repl) ;
+            repl->onReceived(this, std::move(pkg)) ;
         })
     {
-        telnet->addChannel((TelnetChannel*)this) ;
+        repl->addChannel((REPLChannel*)this) ;
     }
 
-    TelnetChannelNClass::~TelnetChannelNClass(){
-        telnet->removeChannel((TelnetChannel*)this) ;
+    REPLChannelNClass::~REPLChannelNClass(){
+        repl->removeChannel((REPLChannel*)this) ;
     }
 
-    JSValue TelnetChannelNClass::constructor(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-        auto obj = new TelnetChannelNClass(ctx) ;
+    JSValue REPLChannelNClass::constructor(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+        auto obj = new REPLChannelNClass(ctx) ;
         obj->shared() ;
         return obj->jsobj ;
     }
 
-    JSValue TelnetChannelNClass::process(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    JSValue REPLChannelNClass::process(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_ARGC(1)
-        THIS_NCLASS(TelnetChannelNClass, self)
+        THIS_NCLASS(REPLChannelNClass, self)
         ARGV_TO_UINT8_OPT(1, cmd, Cmd::CALL)
         ARGV_TO_UINT8_OPT(2, pkgid, -1)
 
@@ -66,7 +66,7 @@ namespace be {
     }
 
     
-    void TelnetChannelNClass::sendData (const char * data, size_t datalen) {
+    void REPLChannelNClass::sendData (const char * data, size_t datalen) {
         Console::setChannel("serial") ;
         emitSyncFree("output-stream", {
             JS_NewArrayBufferCopy(ctx, (const uint8_t *)data, datalen)
@@ -82,7 +82,7 @@ namespace be {
         Console::setChannel(nullptr) ;
     }
 
-    void TelnetChannelNClass::send (Package & pkg) {
+    void REPLChannelNClass::send (Package & pkg) {
         Console::setChannel("serial") ;
 
         size_t len = 0 ;
@@ -101,8 +101,8 @@ namespace be {
         Console::setChannel(nullptr) ;
     }
 
-    JSValue TelnetChannelNClass::enableEventOutput(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-        THIS_NCLASS(TelnetChannelNClass, self)
+    JSValue REPLChannelNClass::enableEventOutput(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+        THIS_NCLASS(REPLChannelNClass, self)
         self->enabledOutputEvent = true ;
         return JS_UNDEFINED ;
     }

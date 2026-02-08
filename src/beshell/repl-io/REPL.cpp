@@ -1,4 +1,4 @@
-#include "Telnet.hpp"
+#include "REPL.hpp"
 #include "debug.h"
 #include "BeShell.hpp"
 #include "../module/Process.hpp"
@@ -8,7 +8,7 @@
 #include "mbedtls/aes.h"
 
 #ifdef ESP_PLATFORM
-#include "TelnetModule.hpp"
+#include "REPLModule.hpp"
 #endif
 
 
@@ -18,7 +18,7 @@ using namespace std ;
 
 namespace be {
 
-    Telnet::Telnet(BeShell * beshell)
+    REPL::REPL(BeShell * beshell)
         : beshell(beshell)
 #ifdef ESP_PLATFORM
         , channelSeiral(this)
@@ -35,19 +35,19 @@ namespace be {
 #endif
     }
 
-    void Telnet::setup() {
+    void REPL::setup() {
         pkg_queue = xQueueCreate(PKG_QUEUE_LEN, sizeof(Package *));
         for(auto ch: channels) {
             ch->setup() ;
         }
     }
 
-    void Telnet::execPackage(std::unique_ptr<Package> & pkg) {
+    void REPL::execPackage(std::unique_ptr<Package> & pkg) {
         Package * ptr = pkg.release() ;
         xQueueSend(pkg_queue, &ptr, 0) ;
     }
 
-    void Telnet::defaultTelnetDecryptFunc(Package & pkg) {
+    void REPL::defaultREPLDecryptFunc(Package & pkg) {
 
         if(!pkg.body_len) {
             return ;
@@ -82,13 +82,13 @@ namespace be {
         memcpy(pkg.body(), decrypted_data, datalen) ;
     }
 
-    void Telnet::onReceived(TelnetChannel * ch, std::unique_ptr<Package> pkg){
+    void REPL::onReceived(REPLChannel * ch, std::unique_ptr<Package> pkg){
         if(enableCrypto) {
             if(decryptFunc) {
                 decryptFunc(*pkg) ;
             }
             else {
-                defaultTelnetDecryptFunc(*pkg) ;
+                defaultREPLDecryptFunc(*pkg) ;
             }
         }
         
@@ -99,7 +99,7 @@ namespace be {
         case CALL:
             assert(beshell) ;
             if(beshell->repl) {
-                beshell->repl->input(*pkg, ch) ;
+                beshell->cammonds->input(*pkg, ch) ;
             } else {
                 cout << "call useREPL() first" << endl ;
             }
@@ -154,11 +154,11 @@ namespace be {
         }
     }
 
-    void Telnet::setCryptoFunction(TelnetDecryptFunc decryptFunc) {
+    void REPL::setCryptoFunction(REPLDecryptFunc decryptFunc) {
         this->decryptFunc = decryptFunc ;
     }
 
-    void Telnet::output(const char * data, size_t datalen, int pkgid, uint8_t cmd) {
+    void REPL::output(const char * data, size_t datalen, int pkgid, uint8_t cmd) {
 
         pkgid%= 255 ;
 
@@ -170,11 +170,11 @@ namespace be {
         }
     }
 
-    void Telnet::output(const std::string & data, int pkgid, uint8_t cmd) {
+    void REPL::output(const std::string & data, int pkgid, uint8_t cmd) {
         output(data.c_str(), data.length(), pkgid, cmd) ;
     }
 
-    TelnetChannel * Telnet::channel(const char * name) {
+    REPLChannel * REPL::channel(const char * name) {
 #ifdef ESP_PLATFORM
         if(strcmp(name,"serial")==0){
             return & channelSeiral ;
@@ -190,7 +190,7 @@ namespace be {
 #endif
         return nullptr ;
     }
-    void Telnet::setBLEChannel(TelnetChannel * ch) {
+    void REPL::setBLEChannel(REPLChannel * ch) {
         if(channelBLE) {
             removeChannel(channelBLE) ;
         }
@@ -199,7 +199,7 @@ namespace be {
             addChannel(channelBLE) ;
         }
     }
-    void Telnet::openFile(TelnetChannel * ch, std::unique_ptr<Package> & pkg, bool append) {
+    void REPL::openFile(REPLChannel * ch, std::unique_ptr<Package> & pkg, bool append) {
         
         if( pkg->body()[pkg->body_len-1]!=0 ) {
             ch->sendError(pkg->head.fields.pkgid, "Invalid path value(must be null ending)") ;
@@ -222,10 +222,10 @@ namespace be {
             ch->sendError(pkg->head.fields.pkgid, "can not open file: %s", cpath) ;
         }
     }
-    void Telnet::offsetFile(TelnetChannel * ch, std::unique_ptr<Package> & pkg) {
+    void REPL::offsetFile(REPLChannel * ch, std::unique_ptr<Package> & pkg) {
         ch->sendError(pkg->head.fields.pkgid, "cmd not implements") ;
     }
-    void Telnet::closeFile(TelnetChannel * ch, std::unique_ptr<Package> & pkg) {
+    void REPL::closeFile(REPLChannel * ch, std::unique_ptr<Package> & pkg) {
         if(ch->openedFile) {
             fclose(ch->openedFile) ;
             ch->openedFile = nullptr ;
@@ -233,7 +233,7 @@ namespace be {
         ch->send(nullptr,0,pkg->head.fields.pkgid,RSPN) ;
     }
     
-    void Telnet::pushFile(TelnetChannel * ch, std::unique_ptr<Package> & pkg) {
+    void REPL::pushFile(REPLChannel * ch, std::unique_ptr<Package> & pkg) {
         if(!ch->openedFile) {
             ch->sendError(pkg->head.fields.pkgid, "file not opened") ;
             return ;
@@ -259,7 +259,7 @@ namespace be {
             ch->send(nullptr, 0, pkg->head.fields.pkgid, RSPN) ;
         }
     }
-    void Telnet::pullFile(TelnetChannel * ch, std::unique_ptr<Package> & pkg) {
+    void REPL::pullFile(REPLChannel * ch, std::unique_ptr<Package> & pkg) {
         
         const char * cpath = (const char *)pkg->body() ;
         int pathlen = strlen(cpath) + 1 ;
@@ -328,10 +328,10 @@ namespace be {
         ch->sendData((const char *)&verifysum,1) ;
     }
 
-    void Telnet::addChannel(TelnetChannel * ch) {
+    void REPL::addChannel(REPLChannel * ch) {
         channels.push_back(ch) ;
     }
-    void Telnet::removeChannel(TelnetChannel * ch) {
+    void REPL::removeChannel(REPLChannel * ch) {
         channels.erase(std::remove(channels.begin(), channels.end(), ch), channels.end()) ;
     }
 }

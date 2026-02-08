@@ -1,13 +1,13 @@
 #pragma once
 
-#include "TelnetChannel.hpp"
+#include "REPLChannel.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
 #if CONFIG_USB_OTG_SUPPORTED
 namespace be {
-    class TelnetCDC: public TelnetChannel {
+    class REPLCDC: public REPLChannel {
     private:
         TaskHandle_t taskHandle = nullptr ;
         QueueHandle_t pkg_queue;
@@ -16,10 +16,10 @@ namespace be {
         uint32_t rx_buffer_size = 0;
         uint32_t tx_buffer_size = 0;
 
-        static void taskListen(TelnetCDC * cdc) ;
+        static void taskListen(REPLCDC * cdc) ;
 
     public:
-        using TelnetChannel::TelnetChannel ;
+        using REPLChannel::REPLChannel ;
         void setup() ;
         void setup(uint32_t rx_buffer_size, uint32_t tx_buffer_size) ;
         void loop () ;

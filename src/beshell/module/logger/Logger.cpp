@@ -1,8 +1,8 @@
 #include "./Logger.hpp"
 #include "logger-imp.hpp"
 #include "../../basic/Console.hpp"
-#include "../../telnet/TelnetChannel.hpp"
-#include "../../telnet/Protocal.hpp"
+#include "../../repl-io/REPLChannel.hpp"
+#include "../../repl-io/Protocal.hpp"
 #include <unistd.h>
 #include <stdarg.h>
 #include <string.h>
@@ -98,9 +98,9 @@ extern "C" {
 
 namespace be {
 
-    class TelnetChannelLogCapture : public TelnetChannel {
+    class REPLChannelLogCapture : public REPLChannel {
     public:
-        using TelnetChannel::TelnetChannel;  // 继承基类构造函数
+        using REPLChannel::REPLChannel;  // 继承基类构造函数
 
         // 实现纯虚函数 sendData，这是数据截获的关键点
         virtual void sendData(const char* data, size_t datalen) override {
@@ -127,7 +127,7 @@ namespace be {
         setuped = true;
 
         // 添加日志捕获通道
-        beshell.telnet->addChannel(new TelnetChannelLogCapture(beshell.telnet));
+        beshell.repl->addChannel(new REPLChannelLogCapture(beshell.repl));
 
         // 调用底层实现
         int result = log_setup(partitionName, bufferSize, start, end, core_id);

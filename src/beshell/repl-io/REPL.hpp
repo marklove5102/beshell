@@ -3,50 +3,50 @@
 #include <memory>
 #include <vector>
 
-#include "TelnetChannel.hpp"
+#include "REPLChannel.hpp"
 
 #ifdef ESP_PLATFORM
 #include "freertos/queue.h"
 
-#include "TelnetSerial.hpp"
+#include "REPLSerial.hpp"
 #endif 
 #ifdef LINUX_PLATFORM
-#include "TelnetStdIO.hpp"
+#include "REPLStdIO.hpp"
 #endif 
 
 
 namespace be {
 
-    typedef void (*TelnetDecryptFunc)(Package & pkg) ;
+    typedef void (*REPLDecryptFunc)(Package & pkg) ;
 
     class BeShell ;
-    // class TelnetModule ;
-    class Telnet {
+    // class REPLModule ;
+    class REPL {
     private:
 
         BeShell * beshell ;
         
 #ifdef ESP_PLATFORM
-        TelnetSerial channelSeiral ;
-        TelnetChannel * channelBLE = nullptr ;
+        REPLSerial channelSeiral ;
+        REPLChannel * channelBLE = nullptr ;
 #endif
 #ifdef LINUX_PLATFORM
-        TelnetStdIO channelStdIO ;
+        REPLStdIO channelStdIO ;
 #endif
 
-        std::vector<TelnetChannel *> channels ;
+        std::vector<REPLChannel *> channels ;
 
         uint8_t autoIncreasePkgId = 0 ;
         QueueHandle_t pkg_queue;
 
-        TelnetDecryptFunc decryptFunc = nullptr ;
+        REPLDecryptFunc decryptFunc = nullptr ;
 
         bool enableCrypto = false ;
         unsigned char cryptoKey[16] = {0} ;
         unsigned char cryptoVI[16] = {0} ;
 
     public:
-        Telnet(BeShell * beshell) ;
+        REPL(BeShell * beshell) ;
 
         void setup() ;
         inline void loop() {
@@ -65,27 +65,27 @@ namespace be {
         void output(const char * data, size_t datalen, int pkgid=-1, uint8_t cmd=OUTPUT) ;
         void output(const std::string & data, int pkgid=-1, uint8_t cmd=OUTPUT) ;
 
-        void onReceived(TelnetChannel * , std::unique_ptr<Package>) ;
+        void onReceived(REPLChannel * , std::unique_ptr<Package>) ;
         void execPackage(std::unique_ptr<Package> &) ;
 
         static std::unique_ptr<std::ostream> createStream(Package & pkg) ;
 
-        TelnetChannel * channel(const char * name) ;
-        void setBLEChannel(TelnetChannel * ch) ;
+        REPLChannel * channel(const char * name) ;
+        void setBLEChannel(REPLChannel * ch) ;
 
-        void addChannel(TelnetChannel * ch) ;
-        void removeChannel(TelnetChannel * ch) ;
+        void addChannel(REPLChannel * ch) ;
+        void removeChannel(REPLChannel * ch) ;
 
-        void setCryptoFunction(TelnetDecryptFunc decryptFunc) ;
-        void defaultTelnetDecryptFunc(Package & pkg) ;
+        void setCryptoFunction(REPLDecryptFunc decryptFunc) ;
+        void defaultREPLDecryptFunc(Package & pkg) ;
 
     protected:
-        void openFile(TelnetChannel * ch, std::unique_ptr<Package> & pkg, bool append) ;
-        void offsetFile(TelnetChannel * ch, std::unique_ptr<Package> & pkg) ;
-        void closeFile(TelnetChannel * ch, std::unique_ptr<Package> & pkg) ;
-        void pushFile(TelnetChannel * , std::unique_ptr<Package> &) ;
-        void pullFile(TelnetChannel * , std::unique_ptr<Package> &) ;
+        void openFile(REPLChannel * ch, std::unique_ptr<Package> & pkg, bool append) ;
+        void offsetFile(REPLChannel * ch, std::unique_ptr<Package> & pkg) ;
+        void closeFile(REPLChannel * ch, std::unique_ptr<Package> & pkg) ;
+        void pushFile(REPLChannel * , std::unique_ptr<Package> &) ;
+        void pullFile(REPLChannel * , std::unique_ptr<Package> &) ;
 
-    friend class TelnetModule ;
+    friend class REPLModule ;
     } ;
 }

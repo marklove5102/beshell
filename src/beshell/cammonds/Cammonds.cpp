@@ -1,7 +1,7 @@
-#include "REPL.hpp"
+#include "Cammonds.hpp"
 #include "string_utils.hpp"
 #include "BeShell.class.hpp"
-#include "telnet/Telnet.hpp"
+#include "repl-io/REPL.hpp"
 #include "../path.hpp"
 #include "../module/NVS.hpp"
 #include "debug.h"
@@ -77,7 +77,7 @@ namespace be {
         }
     }
 
-    REPL::REPL(BeShell * _beshell)
+    Cammonds::Cammonds(BeShell * _beshell)
         : beshell(_beshell)
     {
         registerCommand("ls",
@@ -86,7 +86,7 @@ namespace be {
                 "  -(l|-list)                   output list\n"
                 "  -(h)                         with -l, print human readable sizes\n"
                 "  -(?|-help)                   print this message and exit\n"
-            , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+            , [](BeShell * beshell, REPLChannel * ch, Options & args){
                 
                 string path = FS::resolve(args[0]) ;
                 FS::toVFSPath(path) ;
@@ -183,14 +183,14 @@ namespace be {
             }
         ) ;
         
-        registerCommand("pwd", nullptr, [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        registerCommand("pwd", nullptr, [](BeShell * beshell, REPLChannel * ch, Options & args){
                 ch->send(FS::cwd()+"\n") ;
             }
         ) ;
 
         registerCommand("cd",
             "Usage: cd <path>"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
                 ARGS_TO_DIR(0, path)
                 FS::setCwd(path) ;
             }
@@ -198,7 +198,7 @@ namespace be {
         
         registerCommand("cat",
             "Usage: cat <filepath>"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
                 ARGS_TO_FILE(0, path)
                 int readed = 0 ;
                 unique_ptr<char> content = FS::readFileSync(path.c_str(), &readed) ;
@@ -208,7 +208,7 @@ namespace be {
 
         registerCommand("source", 
             "Usage: source <filepath> <arg?> ..."
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
                 ARGS_TO_FILE(0, path)
 
                 JSValue argv = JS_NewArray(beshell->engine->ctx) ;
@@ -228,7 +228,7 @@ namespace be {
 
         registerCommand("touch", 
             "Usage: touch <filepath>"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
             if(args.length()<1){
                 ch->send("Miss filename") ;
                 return ;
@@ -242,7 +242,7 @@ namespace be {
             "Usage: rm <filepath>"
             "Options:\n"
             "  -(r)                   recursive\n"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
             if(args.length()<1) {
                 ch->send("missing path") ;
             }
@@ -256,7 +256,7 @@ namespace be {
             "Usage: mkdir <filepath>"
             "Options:\n"
             "  -(r)                   recursive\n"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
             if(args.length()<1) {
                 ch->send("missing path") ;
             }
@@ -269,7 +269,7 @@ namespace be {
 #ifdef ESP_PLATFORM
         registerCommand("reboot", 
             "Usage: reboot <path?>"
-        , [this](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [this](BeShell * beshell, REPLChannel * ch, Options & args){
             if(args.length()>0) {
                 string path = FS::resolve(args[0]) ;
                 if( !FS::exist(path.c_str()) ){
@@ -289,7 +289,7 @@ namespace be {
             "Options:\n"
             "  -r                   recursive\n"
             "  -f                   force copy (override exsits file)\n"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
             if(args.length()<2) {
                 ch->send("missing source or dest path") ;
             }
@@ -300,7 +300,7 @@ namespace be {
 
         registerCommand("mv", 
             "Usage: mv <from> <to>"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
             if(args.length()<2) {
                 ch->send("missing from or to path") ;
             }
@@ -311,7 +311,7 @@ namespace be {
 
         registerCommand("free", 
             "Usage: free"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
 
             int heap_total = 0 ;
             int heap_used = 0 ;
@@ -350,7 +350,7 @@ namespace be {
         
         registerCommand("top", 
             "Usage: top"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
 
             string buff ;
 #ifdef ESP_PLATFORM
@@ -422,7 +422,7 @@ namespace be {
 
         registerCommand("import", 
             "Usage: import <module>"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
             if(args.length()<1) {
                 ch->send("missing module name") ;
                 return ;
@@ -446,26 +446,26 @@ namespace be {
 
         registerCommand("login", 
             "Usage: login <password>"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
             if(args.length()<1) {
                 return ;
             }
-            if(beshell->repl->password==args[0]) {
+            if(beshell->cammonds->password==args[0]) {
                 ch->send("login success\n") ;
-                beshell->repl->logined = true ;
+                beshell->cammonds->logined = true ;
             }
         })->ignoreLogin = true ;
         
         registerCommand("logout", 
             "Usage: logout"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
             ch->send("bye\n") ;
-            beshell->repl->logined = false ;
+            beshell->cammonds->logined = false ;
         }) ;
 
         registerCommand("compile", 
             "Usage: compile <path>"
-        , [](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [](BeShell * beshell, REPLChannel * ch, Options & args){
             if(args.length()<1) {
                 ch->send("missing path") ;
             }
@@ -501,7 +501,7 @@ namespace be {
 
         registerCommand("help", 
             "Usage: help"
-        , [this](BeShell * beshell, TelnetChannel * ch, Options & args){
+        , [this](BeShell * beshell, REPLChannel * ch, Options & args){
             string buff ;
             bool first = true ;
             for(const auto & pair: commands) {
@@ -534,12 +534,12 @@ namespace be {
     // , compile, help, "?": help
     }
 
-    void REPL::input(Package & pkg, TelnetChannel * ch) {
+    void Cammonds::input(Package & pkg, REPLChannel * ch) {
 
         assert(beshell) ;
 
         int rspnId = pkg.head.fields.cmd==LINE? -1: pkg.head.fields.pkgid ;
-        bool echo = pkg.head.fields.cmd==LINE && beshell->telnet ;
+        bool echo = pkg.head.fields.cmd==LINE && beshell->repl ;
         if(echo && !ch->disableEcho) {
             ch->send((char *)pkg.body(), pkg.body_len) ;
         }
@@ -619,7 +619,7 @@ namespace be {
         return 0 ;
     }
 
-    bool REPL::execCommand(TelnetChannel * ch, const char * input, int iptLen) {
+    bool Cammonds::execCommand(REPLChannel * ch, const char * input, int iptLen) {
         if(iptLen<0) {
             iptLen = strlen(input) ;
         }
@@ -628,7 +628,7 @@ namespace be {
         int res = parse(input, iptLen, argv) ;
 
         string & name = argv[0] ;
-        shared_ptr<REPLCommand> cmd ;
+        shared_ptr<CammondsCommand> cmd ;
 
         if(commands.count(name)>0 ) {
             cmd = commands[name] ;
@@ -667,7 +667,7 @@ namespace be {
         return true ;
     }
 
-    void REPL::setPassword(const std::string & pwd) {
+    void Cammonds::setPassword(const std::string & pwd) {
         password = pwd ;
         logined = false ;
     }
@@ -686,7 +686,7 @@ namespace be {
     // "Examples:",
     // "  ./test -t=4 --range 100 200",
     // "  ./test -t 2 --range 1 10000 -n=100000000",
-    std::shared_ptr<REPLCommand> REPL::registerCommand(const char * name, const char * cusage, REPLCommandHandler handler) {
+    std::shared_ptr<CammondsCommand> Cammonds::registerCommand(const char * name, const char * cusage, CammondsCommandHandler handler) {
 
         std::vector<std::string> usageLines ;
         if(cusage) {
@@ -695,14 +695,14 @@ namespace be {
         }
         Options * opts = new Options(usageLines) ;
         
-        commands[name] = std::shared_ptr<REPLCommand>(new REPLCommand()) ;
+        commands[name] = std::shared_ptr<CammondsCommand>(new CammondsCommand()) ;
         commands[name]->handler = handler ;
         commands[name]->args.reset(opts) ;
 
         return commands[name] ;
     }
 
-    void REPL::alias(const char * alias, const char * origin) {
+    void Cammonds::alias(const char * alias, const char * origin) {
         if(commands.count(origin)<1) {
             return ;
         }

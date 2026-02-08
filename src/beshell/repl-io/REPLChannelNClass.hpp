@@ -1,10 +1,10 @@
 #pragma once
 
 #include <EventEmitter.hpp>
-#include "TelnetChannel.hpp"
+#include "REPLChannel.hpp"
 
 namespace be {
-    class TelnetChannelNClass: public be::EventEmitter, public TelnetChannel {
+    class REPLChannelNClass: public be::EventEmitter, public REPLChannel {
         DECLARE_NCLASS_META
     private:
         static std::vector<JSCFunctionListEntry> methods ;
@@ -14,8 +14,8 @@ namespace be {
 
         Parser parser ;
     public:
-        TelnetChannelNClass(JSContext * ctx, JSValue _jsobj=JS_NULL) ;
-        ~TelnetChannelNClass() ;
+        REPLChannelNClass(JSContext * ctx, JSValue _jsobj=JS_NULL) ;
+        ~REPLChannelNClass() ;
         
         static JSValue constructor(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
 

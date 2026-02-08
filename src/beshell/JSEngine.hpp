@@ -1,7 +1,7 @@
 #pragma once
 
 #include "./deps/quickjs/quickjs-libc.h"
-#include "./telnet/Telnet.hpp"
+#include "./repl-io/REPL.hpp"
 #include "./JSTimer.hpp"
 #include "./ModuleLoader.hpp"
 #include "./basic/Console.hpp"
@@ -77,8 +77,8 @@ namespace be {
         void setup() ;
         void loop() ;
 
-        void print(JSValue content, int pkgId=-1, uint8_t cmd=OUTPUT, TelnetChannel * ch=nullptr) ;
-        void dumpError(int pkgId=-1, TelnetChannel * ch=nullptr) ;
+        void print(JSValue content, int pkgId=-1, uint8_t cmd=OUTPUT, REPLChannel * ch=nullptr) ;
+        void dumpError(int pkgId=-1, REPLChannel * ch=nullptr) ;
         static std::string getExceptionStr(JSContext * ctx, JSValue exception) ;
 
         static void setGlobalValue(JSContext * ctx, const char * name, JSValue) ;

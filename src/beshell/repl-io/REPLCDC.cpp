@@ -1,5 +1,5 @@
-#include "TelnetCDC.hpp"
-#include "Telnet.hpp"
+#include "REPLCDC.hpp"
+#include "REPL.hpp"
 #include "Protocal.hpp"
 #include <iostream>
 #include "debug.h"
@@ -28,15 +28,15 @@ extern "C" {
 namespace be {
 
     
-    void TelnetCDC::taskListen(TelnetCDC * cdc) {
+    void REPLCDC::taskListen(REPLCDC * cdc) {
         
         assert(cdc) ;
         
-        // forwarding received package to telnet
+        // forwarding received package to repl
         Parser parser([cdc](std::unique_ptr<Package> pkg, void * opaque) {
-            assert(cdc->telnet) ;
-            pkg->channle = (TelnetChannel*)cdc ;
-            cdc->telnet->execPackage(pkg) ;
+            assert(cdc->repl) ;
+            pkg->channle = (REPLChannel*)cdc ;
+            cdc->repl->execPackage(pkg) ;
         }) ;
 
         uint8_t buf[256];
@@ -48,10 +48,10 @@ namespace be {
         }
     }
 
-    void TelnetCDC::setup () {
+    void REPLCDC::setup () {
         setup(256, 256) ;
     }
-    void TelnetCDC::setup (uint32_t rx_size, uint32_t tx_size) {
+    void REPLCDC::setup (uint32_t rx_size, uint32_t tx_size) {
         if(setuped) {
             return ;
         }
@@ -80,18 +80,18 @@ namespace be {
         setuped = true ;
     }
 
-    void TelnetCDC::loop () {
+    void REPLCDC::loop () {
         Package * ptr ;
         std::unique_ptr<Package> pkg ;
         if(xQueueReceive(pkg_queue, (void*)&ptr, 0)){
             pkg.reset(ptr) ;
-            if(telnet){
-                telnet->onReceived(this,move(pkg)) ;
+            if(repl){
+                repl->onReceived(this,move(pkg)) ;
             }
         }
     }
 
-    void TelnetCDC::sendData (const char * data, size_t datalen) {
+    void REPLCDC::sendData (const char * data, size_t datalen) {
         if(!setuped || !usb_serial_jtag_write_ready()) {
             return ;
         }

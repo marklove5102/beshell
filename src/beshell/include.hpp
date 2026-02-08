@@ -16,14 +16,14 @@
 #include "./fs/FS.hpp"
 #include "./fs/LittleFS.hpp"
 
-// telnet/repl
-#include "./telnet/Protocal.hpp"
-#include "./telnet/TelnetChannel.hpp"
-#include "./telnet/TelnetSerial.hpp"
-#include "./telnet/TelnetStdIO.hpp"
-#include "./telnet/TelnetCDC.hpp"
-#include "./telnet/Telnet.hpp"
-#include "./repl/REPL.hpp"
+// repl-io/repl
+#include "./repl-io/Protocal.hpp"
+#include "./repl-io/REPLChannel.hpp"
+#include "./repl-io/REPLSerial.hpp"
+#include "./repl-io/REPLStdIO.hpp"
+#include "./repl-io/REPLCDC.hpp"
+#include "./repl-io/REPL.hpp"
+#include "./cammonds/Cammonds.hpp"
 
 // module
 #include "./module/gpio/GPIO.hpp"

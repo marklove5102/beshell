@@ -3,8 +3,8 @@
 #include <vector>
 #include "./JSEngine.hpp"
 #include "./NativeModule.hpp"
-#include "./repl/REPL.hpp"
-#include "./telnet/Telnet.hpp"
+#include "./cammonds/Cammonds.hpp"
+#include "./repl-io/REPL.hpp"
 #include "./driver/DriverModule.hpp"
 #include "./deps/quickjs/quickjs.h"
 
@@ -29,7 +29,7 @@ namespace be {
 
     public:
         JSEngine * engine ;
-        Telnet * telnet ;
+        Cammonds * cammonds ;
         REPL * repl ;
 
 
@@ -37,7 +37,7 @@ namespace be {
         ~BeShell() ;
         void setup() ;
         inline void loop() {
-            telnet->loop() ;
+            repl->loop() ;
             engine->loop() ;
             for(auto pair:loopFunctions) {
                 pair.first(*this, pair.second) ;
@@ -62,11 +62,11 @@ namespace be {
             be::driver::DriverModule::useDriver<CLASS>() ;
         }
 
-        // TelnetChannel 类
-        template <typename CLASS, typename std::enable_if<std::is_base_of<TelnetChannel, CLASS>::value, int>::type = 0>
+        // REPLChannel 类
+        template <typename CLASS, typename std::enable_if<std::is_base_of<REPLChannel, CLASS>::value, int>::type = 0>
         void use() {
-            CLASS * channel = new CLASS(telnet) ;
-            telnet->addChannel(channel) ;
+            CLASS * channel = new CLASS(repl) ;
+            repl->addChannel(channel) ;
         }
     } ;
 

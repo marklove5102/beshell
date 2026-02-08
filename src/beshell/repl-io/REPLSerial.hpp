@@ -1,12 +1,12 @@
 #pragma once
 
-#include "TelnetChannel.hpp"
+#include "REPLChannel.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
 namespace be {
-    class TelnetSerial: public TelnetChannel {
+    class REPLSerial: public REPLChannel {
     private:
         TaskHandle_t taskHandle = nullptr ;
         QueueHandle_t uart_queue;
@@ -15,7 +15,7 @@ namespace be {
         static void task(void * argv) ;
 
     public:
-        using TelnetChannel::TelnetChannel ;
+        using REPLChannel::REPLChannel ;
         void setup() ;
         void sendData (const char * data, size_t datalen) ;
     } ;

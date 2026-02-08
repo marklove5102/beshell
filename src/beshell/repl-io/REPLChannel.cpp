@@ -1,5 +1,5 @@
-#include "TelnetChannel.hpp"
-#include "Telnet.hpp"
+#include "REPLChannel.hpp"
+#include "REPL.hpp"
 #include <cstring>
 #include "mallocf.h"
 #include "debug.h"
@@ -7,25 +7,25 @@
 
 namespace be {
 
-    TelnetChannel::TelnetChannel(Telnet * _telnet)
-        : telnet(_telnet)
+    REPLChannel::REPLChannel(REPL * _repl)
+        : repl(_repl)
     {
 #ifdef ESP_PLATFORM
         mutex  = xSemaphoreCreateMutex();
 #endif
     }
     
-    void TelnetChannel::send (Package & pkg) {
+    void REPLChannel::send (Package & pkg) {
         // mutexTake() ;
         sendData((const char *)pkg.head.raw, pkg.head_len);
         sendData((const char *)pkg.body(), pkg.body_len);
         sendData((const char *)&pkg.verifysum, 1);
         // mutexGive() ;
     }
-    void TelnetChannel::send (const std::string & data, int pkgId, uint8_t cmd) {
+    void REPLChannel::send (const std::string & data, int pkgId, uint8_t cmd) {
         send(data.c_str(), data.length(), pkgId, cmd) ;
     }
-    void TelnetChannel::send (const char * data, int datalen, int pkgId, uint8_t cmd) {
+    void REPLChannel::send (const char * data, int datalen, int pkgId, uint8_t cmd) {
         if(datalen<0) {
             datalen = strlen(data) ;
         }
@@ -49,7 +49,7 @@ namespace be {
         }
     }
     
-    void TelnetChannel::sendError(int pkgid, const char * format, ...) {
+    void REPLChannel::sendError(int pkgid, const char * format, ...) {
         va_list args;
         va_start( args, format );
         char * message = vstrdupf(format, args) ;
@@ -58,18 +58,18 @@ namespace be {
         free(message) ;
     }
     
-    bool TelnetChannel::mutexTake() {
+    bool REPLChannel::mutexTake() {
 #ifdef ESP_PLATFORM
         return xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE ;
 #endif
         return true ;
     }
-    void TelnetChannel::mutexGive() {
+    void REPLChannel::mutexGive() {
 #ifdef ESP_PLATFORM
         xSemaphoreGive(mutex);
 #endif
     }
-    void TelnetChannel::setup() {
+    void REPLChannel::setup() {
         // Default setup does nothing, can be overridden by subclasses
     }
 }

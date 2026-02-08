@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TelnetChannel.hpp"
+#include "REPLChannel.hpp"
 #include <unistd.h>
 #include <sys/types.h>
 
@@ -9,8 +9,8 @@
 
 
 namespace be {
-    class Telnet ;
-    class TelnetStdIO: public TelnetChannel {
+    class REPL ;
+    class REPLStdIO: public REPLChannel {
     private:
     
         fd_set readfds;
@@ -21,9 +21,9 @@ namespace be {
         void sendData (const char * data, size_t datalen) ;
 
     public:
-        // using TelnetChannel::TelnetChannel ;
+        // using REPLChannel::REPLChannel ;
         
-        TelnetStdIO(Telnet *) ;
+        REPLStdIO(REPL *) ;
         void setup () ;
         void loop () ;
     

@@ -10,14 +10,14 @@ namespace be{
     
 	typedef void (*NativeModuleExportorFunc)(JSContext * ctx, NativeModule * module) ;
 
-    class TelnetModule: public be::EventModule {
+    class REPLModule: public be::EventModule {
 
         static std::vector<NativeModuleExportorFunc> exportors ;
 
     public:
         static char const * const name ;
 
-        TelnetModule(JSContext * ctx, const char * name) ;
+        REPLModule(JSContext * ctx, const char * name) ;
         static void registerExportor(NativeModuleExportorFunc func) ;
 
         static JSValue enableCrypto(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;

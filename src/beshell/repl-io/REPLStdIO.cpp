@@ -1,5 +1,5 @@
-#include "TelnetStdIO.hpp"
-#include "Telnet.hpp"
+#include "REPLStdIO.hpp"
+#include "REPL.hpp"
 #include <iostream>
 #include <iomanip>
 #include <cstring>
@@ -11,15 +11,15 @@ using namespace std ;
 
 namespace be {
     
-    TelnetStdIO::TelnetStdIO(Telnet * telnet)
-        : TelnetChannel(telnet)
+    REPLStdIO::REPLStdIO(REPL * repl)
+        : REPLChannel(repl)
     {
         disableEcho = true ;
     }
 
-    void TelnetStdIO::setup () {
+    void REPLStdIO::setup () {
     }
-    void TelnetStdIO::loop () {
+    void REPLStdIO::loop () {
 
         FD_ZERO(&readfds);
         FD_SET(STDIN_FILENO, &readfds);
@@ -42,11 +42,11 @@ namespace be {
 
             buf[num_bytes] = 0 ;
 
-            telnet->onReceived(this, std::make_unique<Package>(0,LINE, buf, num_bytes)) ;
+            repl->onReceived(this, std::make_unique<Package>(0,LINE, buf, num_bytes)) ;
         }
     }
 
-    void TelnetStdIO::sendData (const char * data, size_t datalen) {
+    void REPLStdIO::sendData (const char * data, size_t datalen) {
         cout << std::setw(datalen) << data << flush ;
     }
 }

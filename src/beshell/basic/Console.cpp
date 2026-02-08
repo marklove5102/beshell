@@ -162,7 +162,7 @@ function block(buffer, columns, separator, numSys) {
         JSEngine * engine = JSEngine::fromJSContext(ctx) ;
         assert(engine) ;
         assert(engine->beshell) ;
-        assert(engine->beshell->telnet) ;
+        assert(engine->beshell->repl) ;
 
         char const * cname = Console::channelName ;
 
@@ -171,13 +171,13 @@ function block(buffer, columns, separator, numSys) {
         }
 
         if(cname) {
-            TelnetChannel * channel = engine->beshell->telnet->channel(cname) ;
+            REPLChannel * channel = engine->beshell->repl->channel(cname) ;
             if(channel) {
                 channel->send(str.c_str(), str.length()) ;
             }
         }
         else {
-            engine->beshell->telnet->output(str.c_str(), str.length()) ;
+            engine->beshell->repl->output(str.c_str(), str.length()) ;
         }
 
         if(argc>1) {

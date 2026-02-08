@@ -1,12 +1,12 @@
 ﻿import { importSync, exportValue } from 'loader'
-import * as telnet from 'telnet'
+import * as repl from 'repl'
 import * as mg from 'mg'
 
 // websocket
 const ws = {
     connect(url) {
 
-        let channel = new telnet.TelnetChannel()
+        let channel = new repl.REPLChannel()
 
         let conn = mg.connect(url, (ev, data, isBinary) => {
             if (ev == "ws.msg") {
@@ -27,13 +27,13 @@ const ws = {
     }
 }
 
-exportValue(telnet, "ws", ws)
+exportValue(repl, "ws", ws)
 
 // USB CDC
 try {
     var cdc = importSync("cdc")
 } catch (e) { }
-exportValue(telnet, "cdc", {
+exportValue(repl, "cdc", {
     start() {
         if (!cdc) {
             throw new Error("cdc module not used, call `beshell.use<CDC>()` in C++ first")
@@ -42,7 +42,7 @@ exportValue(telnet, "cdc", {
         cdc.on("data", (data) => {
             cdcChannel && cdcChannel.process(data)
         })
-        let cdcChannel = new telnet.TelnetChannel()
+        let cdcChannel = new repl.REPLChannel()
         cdcChannel.on("output-stream", (data) => {
             cdc && cdc.write(data)
         })
@@ -53,10 +53,10 @@ exportValue(telnet, "cdc", {
 let mqttChannel = null
 let mqttClient = null
 let mqttTopicIn = null
-exportValue(telnet, "mqtt", {
+exportValue(repl, "mqtt", {
     start(mqtt, topicIn = null, topicOut = null) {
         if(mqttChannel) {
-            throw new Error("telnet.mqtt already started")
+            throw new Error("repl.mqtt already started")
         }
         if(!topicIn) {
             topicIn = "beshell/repl/in/" + process.readMac("base", true)
@@ -67,7 +67,7 @@ exportValue(telnet, "mqtt", {
 
         mqtt.sub(topicIn)
 
-        mqttChannel = new telnet.TelnetChannel()
+        mqttChannel = new repl.REPLChannel()
 
         mqttChannel.on("output-stream", (data) => {
             mqtt.push(topicOut, data)

@@ -7,7 +7,7 @@ namespace be{
     
 // 前向声明
     class BeShell ;
-    class TelnetChannelLogCapture;
+    class REPLChannelLogCapture;
 
     class Logger: public be::NativeModule {
     public:

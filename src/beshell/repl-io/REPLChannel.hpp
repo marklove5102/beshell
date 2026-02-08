@@ -7,9 +7,9 @@
 
 namespace be {
     
-    class Telnet ;
+    class REPL ;
 
-    class TelnetChannel {
+    class REPLChannel {
     private:
 #ifdef ESP_PLATFORM
         SemaphoreHandle_t mutex;
@@ -18,12 +18,12 @@ namespace be {
         FILE * openedFile = nullptr ;
 
     protected:
-        // TelnetPkgProcFunc packageHandler = nullptr;
-        Telnet * telnet = nullptr ;
+        // REPLPkgProcFunc packageHandler = nullptr;
+        REPL * repl = nullptr ;
     public:
         bool disableEcho = true ;
 
-        TelnetChannel(Telnet *) ;
+        REPLChannel(REPL *) ;
         virtual void sendData (const char * data, size_t datalen) = 0 ;
         void send (const std::string & data, int pkgId=-1, uint8_t cmd=OUTPUT) ;
         virtual void send (const char * data, int datalen=-1, int pkgId=-1, uint8_t cmd=OUTPUT) ;
@@ -35,6 +35,6 @@ namespace be {
         
         virtual void setup() ;
 
-        friend class Telnet ;
+        friend class REPL ;
     } ;
 }

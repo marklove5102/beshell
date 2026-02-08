@@ -13,7 +13,7 @@ namespace be {
     BeShell::BeShell()
         : boot_level(5)
         , engine(new JSEngine(this))
-        , telnet(new Telnet(this))
+        , cammonds(new Cammonds(this))
         , repl(new REPL(this))
     {}
     
@@ -24,8 +24,8 @@ namespace be {
         }
 
     BeShell::~BeShell() {
+        DELETE_VAR(cammonds)
         DELETE_VAR(repl)
-        DELETE_VAR(telnet)
         DELETE_VAR(engine)
     }
     
@@ -41,7 +41,7 @@ namespace be {
     }
 
     void BeShell::setup() {
-        telnet->setup() ;
+        repl->setup() ;
         engine->setup() ;
 
         // output banner

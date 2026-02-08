@@ -1,5 +1,5 @@
-#include "TelnetSerial.hpp"
-#include "Telnet.hpp"
+#include "REPLSerial.hpp"
+#include "REPL.hpp"
 #include "Protocal.hpp"
 #include <iostream>
 #include "driver/uart.h"
@@ -23,7 +23,7 @@ using namespace std ;
 
 namespace be {
 
-    void TelnetSerial::task(void * argv) {
+    void REPLSerial::task(void * argv) {
         
         fd_set rfds;
         struct timeval tv;
@@ -31,15 +31,15 @@ namespace be {
         uint8_t *buf = (uint8_t *) malloc(RD_BUF_SIZE);
 
 
-        // forwarding received package to telnet
+        // forwarding received package to repl
         Parser parser([argv](std::unique_ptr<Package> pkg, void * opaque) {
-            assert(((TelnetSerial*)argv)->telnet) ;
+            assert(((REPLSerial*)argv)->repl) ;
 
             // dn3(pkg->head.fields.cmd, pkg->body_len, pkg->chunk_len)
             // dn(pkg->head.fields.pkgid)
             // pkg->head.fields.cmd = 0 ;
-            pkg->channle = (TelnetChannel*)argv ;
-            ((TelnetSerial*)argv)->telnet->execPackage(pkg) ;
+            pkg->channle = (REPLChannel*)argv ;
+            ((REPLSerial*)argv)->repl->execPackage(pkg) ;
         }) ;
 
         while (1) {
@@ -65,7 +65,7 @@ namespace be {
         vTaskDelete(NULL);
     }
 
-    void TelnetSerial::setup () {
+    void REPLSerial::setup () {
 
         cout << flush ;
         vTaskDelay(15/portTICK_PERIOD_MS) ;
@@ -98,10 +98,10 @@ namespace be {
         uart_pattern_queue_reset(UART_NUM, 20);
 
         // pkg_queue = xQueueCreate(PKG_QUEUE_LEN, sizeof(Package *));
-        xTaskCreatePinnedToCore(&TelnetSerial::task, "be-telnet-seiral", 6*1024, this, tskIDLE_PRIORITY, &taskHandle, 1) ;
+        xTaskCreatePinnedToCore(&REPLSerial::task, "be-repl-seiral", 6*1024, this, tskIDLE_PRIORITY, &taskHandle, 1) ;
     }
 
-    void TelnetSerial::sendData (const char * data, size_t datalen) {
+    void REPLSerial::sendData (const char * data, size_t datalen) {
         if(data && datalen) {
             uart_write_bytes(UART_NUM, data, datalen);
         }

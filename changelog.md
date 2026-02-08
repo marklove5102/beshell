@@ -1,5 +1,7 @@
 
-# v1.0.7 2026/2/6
+# v1.0.7 2026/2/8
+
+New Feature:
 
 * + FS::unmount()/FS::remount()
 * + BeShell::evalMain()
@@ -9,6 +11,7 @@ Reflect:
 
 * - 移除 BT 到独立的 component:  beshell-bt
 * 将 gpio 的 pwm 和 adc 系列api函数放到 gpio.pwm 和 gpio.adc 对象中
+* telnet 改名为 repl
 
 # v1.0.6 2026/2/3
 

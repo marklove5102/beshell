@@ -23,7 +23,7 @@ void app_main(void)
 #endif
 #if CONFIG_USB_OTG_SUPPORTED
     // beshell.use<CDC>() ;
-    beshell.use<TelnetCDC>() ;
+    beshell.use<REPLCDC>() ;
 #endif
 
     // 挂载 js 分区到文件的根目录
