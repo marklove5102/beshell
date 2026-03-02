@@ -4,7 +4,7 @@
 #include "./JSEngine.hpp"
 #include "./NativeModule.hpp"
 #include "./cammonds/Cammonds.hpp"
-#include "./repl-io/REPL.hpp"
+#include "./repl/REPL.hpp"
 #include "./driver/DriverModule.hpp"
 #include "./deps/quickjs/quickjs.h"
 

@@ -1,7 +1,7 @@
 #include "Cammonds.hpp"
 #include "string_utils.hpp"
 #include "BeShell.class.hpp"
-#include "repl-io/REPL.hpp"
+#include "repl/REPL.hpp"
 #include "../path.hpp"
 #include "../module/NVS.hpp"
 #include "debug.h"

@@ -4,7 +4,7 @@
 #include "module/Path.hpp"
 #include "driver/DriverModule.hpp"
 #include "quickjs.h"
-#include "repl-io/REPLModule.hpp"
+#include "repl/REPLModule.hpp"
 #include "JSEngine.hpp"
 #include "BeShell.class.hpp"
 #include "fs/FS.hpp"

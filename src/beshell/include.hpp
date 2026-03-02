@@ -16,13 +16,13 @@
 #include "./fs/FS.hpp"
 #include "./fs/LittleFS.hpp"
 
-// repl-io/repl
-#include "./repl-io/Protocal.hpp"
-#include "./repl-io/REPLChannel.hpp"
-#include "./repl-io/REPLSerial.hpp"
-#include "./repl-io/REPLStdIO.hpp"
-#include "./repl-io/REPLCDC.hpp"
-#include "./repl-io/REPL.hpp"
+// repl/repl
+#include "./repl/Protocal.hpp"
+#include "./repl/REPLChannel.hpp"
+#include "./repl/REPLSerial.hpp"
+#include "./repl/REPLStdIO.hpp"
+#include "./repl/REPLCDC.hpp"
+#include "./repl/REPL.hpp"
 #include "./cammonds/Cammonds.hpp"
 
 // module

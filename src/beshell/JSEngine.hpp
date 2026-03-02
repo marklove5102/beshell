@@ -1,7 +1,7 @@
 #pragma once
 
 #include "./deps/quickjs/quickjs-libc.h"
-#include "./repl-io/REPL.hpp"
+#include "./repl/REPL.hpp"
 #include "./JSTimer.hpp"
 #include "./ModuleLoader.hpp"
 #include "./basic/Console.hpp"

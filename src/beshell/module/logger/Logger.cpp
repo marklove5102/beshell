@@ -1,8 +1,8 @@
 #include "./Logger.hpp"
 #include "logger-imp.hpp"
 #include "../../basic/Console.hpp"
-#include "../../repl-io/REPLChannel.hpp"
-#include "../../repl-io/Protocal.hpp"
+#include "../../repl/REPLChannel.hpp"
+#include "../../repl/Protocal.hpp"
 #include <unistd.h>
 #include <stdarg.h>
 #include <string.h>

@@ -2,7 +2,7 @@
 #include <vector>
 #include <set>
 #include <memory>
-#include "../repl-io/Protocal.hpp"
+#include "../repl/Protocal.hpp"
 #include "../deps/Options.hpp"
 
 
