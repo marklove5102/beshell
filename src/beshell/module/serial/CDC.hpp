@@ -1,5 +1,7 @@
 #pragma once
 
+#include "sdkconfig.h"
+
 #if CONFIG_USB_OTG_SUPPORTED
 
 #include "../../NativeModule.hpp"

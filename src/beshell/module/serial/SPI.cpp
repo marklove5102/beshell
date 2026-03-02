@@ -1,5 +1,8 @@
 #include "SPI.hpp"
 
+#include "driver/gpio.h"
+#include "driver/spi_master.h"
+
 using namespace std ;
 
 namespace be {
@@ -34,7 +37,7 @@ namespace be {
     } ;
     
 
-    SPI::SPI(JSContext * ctx, spi_host_device_t busnum)
+    SPI::SPI(JSContext * ctx, int busnum)
         : NativeClass(ctx, build(ctx))
         , busnum(busnum)
     {
@@ -48,7 +51,7 @@ namespace be {
             }                                   \
             return var ;                        \
         }
-    SPI * SPI::flyweight(JSContext * ctx, spi_host_device_t bus) {
+    SPI * SPI::flyweight(JSContext * ctx, int bus) {
         DEFINE_BUS(SPI1_HOST, spi0)
         #if SOC_SPI_PERIPH_NUM > 1
         else DEFINE_BUS(SPI2_HOST, spi1)
@@ -63,7 +66,7 @@ namespace be {
     }
 
 
-    spi_host_device_t SPI::spiNum() const {
+    int SPI::spiNum() const {
         return busnum ;
     }
     JSValue SPI::spiNum(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){

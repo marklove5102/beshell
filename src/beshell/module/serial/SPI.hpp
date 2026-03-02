@@ -1,9 +1,6 @@
 #pragma once
 
 #include "../../NativeClass.hpp"
-#include "driver/gpio.h"
-#include "driver/spi_master.h"
-#include <map>
 #include "./soc_serial.h"
 
 namespace be {
@@ -14,7 +11,7 @@ namespace be {
         // static std::vector<JSCFunctionListEntry> staticMethods ;
 
     private:
-        spi_host_device_t busnum ;
+        int busnum ;
 
         static SPI * spi0 ;
         #if SOC_SPI_PERIPH_NUM > 1
@@ -27,14 +24,14 @@ namespace be {
         static SPI * spi3 ;
         #endif
 
-        std::map<gpio_num_t, spi_device_handle_t> devices ;
+        // std::map<int, spi_device_handle_t> devices ;
 
     public:
-        SPI(JSContext * ctx, spi_host_device_t busnum=SPI1_HOST) ;
+        SPI(JSContext * ctx, int busnum) ;
 
-        spi_host_device_t spiNum() const ;
+        int spiNum() const ;
 
-        static SPI * flyweight(JSContext *, spi_host_device_t) ;
+        static SPI * flyweight(JSContext *, int) ;
 
         static JSValue setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;
         static JSValue spiNum(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) ;

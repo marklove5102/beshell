@@ -47,9 +47,10 @@ idf_component_register(
         ${src_littlefs}
     INCLUDE_DIRS
         ./src
-    PRIV_REQUIRES
+    REQUIRES
         esp_partition
         driver
+    PRIV_REQUIRES
         mbedtls
         vfs
         fatfs

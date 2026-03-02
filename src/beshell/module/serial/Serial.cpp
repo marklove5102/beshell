@@ -51,6 +51,7 @@
 #include "I2C.hpp"
 #include "SPI.hpp"
 #include <driver/uart.h>
+#include <driver/spi_master.h>
 
 
 using namespace std ;

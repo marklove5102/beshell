@@ -1,3 +1,5 @@
+#include "sdkconfig.h"
+
 #if CONFIG_USB_OTG_SUPPORTED
 
 #include "CDC.hpp"
