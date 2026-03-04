@@ -1,4 +1,17 @@
 
+# v1.0.9 2026/3/4
+
+Fix:
+
+* repl cdc not work
+* gpio adc/pwm issue
+
+# v1.0.8 2026/3/3
+
+Fix:
+
+* 其他 beshell-xxx 下游components的依赖问题
+
 # v1.0.7 2026/2/8
 
 New Feature:

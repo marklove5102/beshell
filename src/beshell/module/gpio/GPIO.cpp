@@ -47,6 +47,7 @@ namespace be {
         exportFunction("adcContinuousRead", adcContinuousRead, 2);
         exportFunction("adcContinuousStop", adcContinuousStop, 1);
         exportFunction("adcContinuousSetCallback", adcContinuousSetCallback, 2);
+        exportName("adc");
 
         // for PWM
         exportFunction("apiConfigPWM", apiConfigPWM, 0);
@@ -54,10 +55,7 @@ namespace be {
         exportFunction("apiUpdatePWM", apiUpdatePWM, 0);
         exportFunction("apiStopPWM", apiStopPWM, 0);
         exportFunction("pwmMaxSpeedMode", pwmMaxSpeedMode, 0);
-        exportName("configPWM");
-        exportName("writePWM");
-        exportName("updatePWM");
-        exportName("stopPWM");
+        exportName("pwm");
 
         // EXPORT_FUNCTION(test);
 

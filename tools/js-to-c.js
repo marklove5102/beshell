@@ -78,7 +78,6 @@ function genDir(jsDir) {
 function genBeShellJS() {
 
     genDir(__dirname+'/../src/beshell/js')
-    genDir(__dirname+'/../src/beshell/js/bt')
 
     const jsDriverDef = [
         // ["PCA9557", "be::driver::io", __dirname+"/../src/js/driver/io/PCA9557.js", __dirname+"/../src/driver/io/PCA9557.cpp"],
