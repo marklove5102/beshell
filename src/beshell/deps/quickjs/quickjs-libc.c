@@ -369,6 +369,7 @@ uint8_t *js_load_file(JSContext *ctx, size_t *pbuf_len, const char *filename)
     
     f = fopen(filename, "rb");
     if (!f) {
+        printf("could not open '%s'\n", filename);
         return NULL;
     }
     if (fseek(f, 0, SEEK_END) < 0)
@@ -388,8 +389,10 @@ uint8_t *js_load_file(JSContext *ctx, size_t *pbuf_len, const char *filename)
         buf = js_malloc(ctx, buf_len + 1);
     else
         buf = malloc(buf_len + 1);
-    if (!buf)
+    if (!buf) {
+        printf("could not allocate memory for file '%s'\n", filename);
         goto fail;
+    }
     if (fread(buf, 1, buf_len, f) != buf_len) {
         errno = EIO;
         if (ctx)

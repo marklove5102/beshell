@@ -367,7 +367,7 @@ namespace be {
 
         buf = js_load_file(ctx, &buf_len, path);
         if (!buf) {
-            JS_ThrowReferenceError(ctx, "could not load module filename '%s'", path);
+            JS_ThrowReferenceError(ctx, "Loader::load() could not load module filename '%s'", path);
             return NULL;
         }
 
