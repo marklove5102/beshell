@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include "Protocal.hpp"
 #include "driver/usb_serial_jtag.h"
+#include "sdkconfig.h"
 
 #define UART_NUM        UART_NUM_0
 #define BUF_SIZE        1024
@@ -92,7 +93,13 @@ namespace be {
     }
 
     void REPLCDC::sendData (const char * data, size_t datalen) {
-        if(!setuped || !usb_serial_jtag_write_ready()) {
+        if(!setuped) {
+            return ;
+        }
+        if(!usb_serial_jtag_is_connected()) {
+            return ;
+        }
+        if(!usb_serial_jtag_write_ready()) {
             return ;
         }
         int buffsize = tx_buffer_size/3;
@@ -105,7 +112,8 @@ namespace be {
                 chunk_size = datalen > buffsize ? buffsize : datalen;
 
                 // 当没有上位机连接时，数据会在缓冲区等待，此时等待数据发送完成是无效的
-                int sentlen = usb_serial_jtag_write_bytes(chunk, chunk_size, 2/portTICK_PERIOD_MS);
+                // 第1个chunk遇到缓冲满，取消发送；后续chunk等待5ms
+                int sentlen = usb_serial_jtag_write_bytes(chunk, chunk_size, 100/portTICK_PERIOD_MS);
                 if(sentlen!=chunk_size) {
                     return ;
                 }
