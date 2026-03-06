@@ -1,4 +1,14 @@
 
+# v1.0.10 
+
+New Feature:
+
+* + ModuleLoader::addModuleSource()
+
+Fix:
+
+* js-to-c.js 生成的 *.c 文件，字符数组由 static 类型改为 const
+
 # v1.0.9 2026/3/4
 
 Fix:
