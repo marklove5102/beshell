@@ -1,4 +1,10 @@
 
+
+New Feature:
+
+* example 可从 CMakeLists.private.txt 文件中加载 components 目录
+* 完善了 JSDoc 文档
+
 # v1.0.10 
 
 New Feature:

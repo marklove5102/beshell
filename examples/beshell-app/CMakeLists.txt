@@ -12,22 +12,31 @@ set(JS_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/js")
 set(JS_IMG_PATH "${CMAKE_CURRENT_LIST_DIR}/img/js.bin")
 
 
-# 自动搜索并设置外部 component 目录
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../components")
-    set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/../../components")
-elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../components")
-    set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/../components")
+# 如果存在 CMakeLists.private.txt，则包含它（可用于覆盖 EXTRA_COMPONENT_DIRS 等配置）
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/CMakeLists.private.txt")
+    include("${CMAKE_CURRENT_LIST_DIR}/CMakeLists.private.txt")
 endif()
 
-# 自动搜索 beshell/tools 目录
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../components/beshell/tools")
-    set(BESHELL_TOOLS_DIR "${CMAKE_CURRENT_LIST_DIR}/../../components/beshell/tools")
-elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../components/beshell/tools")
-    set(BESHELL_TOOLS_DIR "${CMAKE_CURRENT_LIST_DIR}/../components/beshell/tools")
-elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/components/beshell/tools")
-    set(BESHELL_TOOLS_DIR "${CMAKE_CURRENT_LIST_DIR}/components/beshell/tools")
-else()
-    set(BESHELL_TOOLS_DIR "${CMAKE_CURRENT_LIST_DIR}/managed_components/become-cool__beshell/tools")
+# 自动搜索并设置外部 component 目录（如果 CMakeLists.private.txt 未定义）
+if(NOT DEFINED EXTRA_COMPONENT_DIRS)
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../components")
+        set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/../../components")
+    elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../components")
+        set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/../components")
+    endif()
+endif()
+
+# 自动搜索 beshell/tools 目录（如果 CMakeLists.private.txt 未定义）
+if(NOT DEFINED BESHELL_TOOLS_DIR)
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../components/beshell/tools")
+        set(BESHELL_TOOLS_DIR "${CMAKE_CURRENT_LIST_DIR}/../../components/beshell/tools")
+    elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../components/beshell/tools")
+        set(BESHELL_TOOLS_DIR "${CMAKE_CURRENT_LIST_DIR}/../components/beshell/tools")
+    elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/components/beshell/tools")
+        set(BESHELL_TOOLS_DIR "${CMAKE_CURRENT_LIST_DIR}/components/beshell/tools")
+    else()
+        set(BESHELL_TOOLS_DIR "${CMAKE_CURRENT_LIST_DIR}/managed_components/become-cool__beshell/tools")
+    endif()
 endif()
 
 # 设置工具路径

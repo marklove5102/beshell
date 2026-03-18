@@ -5,6 +5,7 @@ dist
 .DS_Store
 dependencies.lock
 CMakeLists.update_example.txt
+CMakeLists.private.txt
 .cache
 .devcontainer
 img/js.bin
