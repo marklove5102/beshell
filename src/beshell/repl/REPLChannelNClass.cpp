@@ -186,7 +186,7 @@ namespace be {
      * 启用输出事件
      * 
      * 启用后，REPL 的输出内容会通过 `output` 事件发送，
-     * 方便在 JS 层捕获和处理 REPL 的输出。
+     * 方便在 JS 侧捕获和处理 REPL 的输出。
      * 
      * 默认情况下只有 `output-stream` 事件，启用后会额外触发 `output` 事件。
      * 

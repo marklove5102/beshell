@@ -310,7 +310,8 @@ namespace be{
      * 
      * @module flash
      * @class Partition
-     * @function label
+     * @property label
+     * @readonly
      * @return string 分区标签
      */
     JSValue Partition::label(JSContext *ctx, JSValueConst this_val) {
@@ -323,7 +324,8 @@ namespace be{
      * 
      * @module flash
      * @class Partition
-     * @function type
+     * @property type
+     * @readonly
      * @return string 分区类型，可能值为 "app"、"data"、"bootloader"、"partition_table" 或 "UNKNOWN"
      */
     JSValue Partition::type(JSContext *ctx, JSValueConst this_val) {
@@ -344,7 +346,8 @@ namespace be{
      * 
      * @module flash
      * @class Partition
-     * @function subtype
+     * @property subtype
+     * @readonly
      * @return number 子类型值
      */
     JSValue Partition::subtype(JSContext *ctx, JSValueConst this_val) {
@@ -357,7 +360,8 @@ namespace be{
      * 
      * @module flash
      * @class Partition
-     * @function address
+     * @property address
+     * @readonly
      * @return number 起始地址
      */
     JSValue Partition::address(JSContext *ctx, JSValueConst this_val) {
@@ -370,7 +374,8 @@ namespace be{
      * 
      * @module flash
      * @class Partition
-     * @function size
+     * @property size
+     * @readonly
      * @return number 分区大小（字节）
      */
     JSValue Partition::size(JSContext *ctx, JSValueConst this_val) {
@@ -383,7 +388,8 @@ namespace be{
      * 
      * @module flash
      * @class Partition
-     * @function readonly
+     * @property readonly
+     * @readonly
      * @return bool 是否只读
      */
     JSValue Partition::readonly(JSContext *ctx, JSValueConst this_val) {
@@ -396,7 +402,8 @@ namespace be{
      * 
      * @module flash
      * @class Partition
-     * @function encrypted
+     * @property encrypted
+     * @readonly
      * @return bool 是否加密
      */
     JSValue Partition::encrypted(JSContext *ctx, JSValueConst this_val) {
@@ -448,7 +455,7 @@ namespace be{
      *
      * @module flash
      * @function allPartitions
-     * @return object 包含所有分区的对象，key 为分区标签，value 为 [Partition](Partition.html "Partition(Flash的分区类)") 对象
+     * @return object 包含所有分区的对象，key 为分区标签，value 为 [Partition](#partition-类 "Partition(Flash的分区类)") 对象
      * @throws 无法找到分区
      */
     JSValue Flash::allPartitions(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -476,7 +483,7 @@ namespace be{
     }
 
     /**
-     * 根据名称获取指定的 Flash 分区，返回值是一个 [Partition](#Partition.html "Partition(Flash的分区类)") 类
+     * 根据名称获取指定的 Flash 分区，返回值是一个 [Partition](#partition-类 "Partition(Flash的分区类)") 类
      * 
      * 通过分区标签名称获取特定的 Flash 分区对象。
      * 
@@ -508,7 +515,7 @@ namespace be{
      * @module flash
      * @function partition
      * @param name:string 分区名称
-     * @return [Partition](#Partition.html) 分区对象
+     * @return [Partition](#partition-类 "Partition(Flash的分区类)") 分区对象
      * @throws 分区不存在
      */
     JSValue Flash::partition(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {

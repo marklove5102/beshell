@@ -198,12 +198,14 @@ namespace be {
      * @class SPI
      * @function setup
      * @param options:object 配置选项对象
-     * @param options.miso:number=-1 MISO 引脚 GPIO 编号（可选）
-     * @param options.mosi:number=-1 MOSI 引脚 GPIO 编号（可选）
-     * @param options.sck:number SCK 引脚 GPIO 编号（必需）
-     * @param options.quadwp_io_num:number=-1 Quad WP IO 编号（可选）
-     * @param options.quadhd_io_num:number=-1 Quad HD IO 编号（可选）
-     * @param options.max_transfer_sz:number=20480 最大传输大小（可选，默认 20480）
+     *     {
+     *         miso?: number,         // MISO 引脚 GPIO 编号，默认 -1
+     *         mosi?: number,         // MOSI 引脚 GPIO 编号，默认 -1
+     *         sck: number,           // SCK 引脚 GPIO 编号（必需）
+     *         quadwp_io_num?: number, // Quad WP IO 编号，默认 -1
+     *         quadhd_io_num?: number, // Quad HD IO 编号，默认 -1
+     *         max_transfer_sz?: number // 最大传输大小，默认 20480
+     *     }
      * @return number 错误代码，0 表示成功
      * @throws SPI 总线初始化失败
      */

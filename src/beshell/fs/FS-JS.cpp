@@ -667,20 +667,6 @@ namespace be {
      * 
      * 返回指定路径的详细元数据信息。如果文件或目录不存在，返回 null。
      * 
-     * 返回对象格式：
-     * ```js
-     * {
-     *     dev:number,      // 设备ID
-     *     ino:number,      // inode 号
-     *     mode:number,     // 文件模式/权限
-     *     size:number,     // 文件大小（字节）
-     *     isDir:bool,      // 是否是目录
-     *     atime:number,    // 最后访问时间（时间戳）
-     *     mtime:number,    // 最后修改时间（时间戳）
-     *     ctime:number     // 创建时间（时间戳）
-     * }
-     * ```
-     * 
      * 示例：
      * ```javascript
      * import * as fs from "fs"
@@ -711,6 +697,16 @@ namespace be {
      * @function statSync
      * @param path:string 要查询的文件或目录路径
      * @return object|null 状态信息对象，路径不存在时返回 null
+     *     {
+     *         dev:number,      // 设备ID
+     *         ino:number,      // inode 号
+     *         mode:number,     // 文件模式/权限
+     *         size:number,     // 文件大小（字节）
+     *         isDir:bool,      // 是否是目录
+     *         atime:number,    // 最后访问时间（时间戳）
+     *         mtime:number,    // 最后修改时间（时间戳）
+     *         ctime:number     // 创建时间（时间戳）
+     *     }
      */
     JSValue FS:: statSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
         ASSERT_ARGC(1)
@@ -892,6 +888,11 @@ namespace be {
      * @function usage
      * @param path:string 分区挂载点路径（如 "/fs"、"/sdcard" 等）
      * @return object 包含存储使用信息的对象
+     *     {
+     *         total:number,  // 总容量（字节）
+     *         used:number,   // 已使用空间（字节）
+     *         free:number    // 可用空间（字节）
+     *     }
      * @throws 路径不是有效的分区挂载点
      * @throws 获取分区使用情况失败
      */

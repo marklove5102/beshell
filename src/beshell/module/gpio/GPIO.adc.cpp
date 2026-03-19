@@ -902,8 +902,10 @@ namespace be {
  * @object adc
  * @function initUnit
  * @param options:object 配置选项
- * @param options.unit:number ADC 单元号（1 或 2）
- * @param options.clk:string 时钟源
+ *     {
+ *         unit: number,          // ADC 单元号（1 或 2）
+ *         clk: string            // 时钟源
+ *     }
  */
 
 /**
@@ -928,10 +930,12 @@ namespace be {
  * @object adc
  * @function initChannel
  * @param options:object 配置选项
- * @param options.unit:number ADC 单元号
- * @param options.channel:number 通道号
- * @param options.atten:number 衰减设置
- * @param options.bitwidth:number 位宽
+ *     {
+ *         unit: number,          // ADC 单元号
+ *         channel: number,       // 通道号
+ *         atten: number,         // 衰减设置
+ *         bitwidth: number       // 位宽
+ *     }
  */
 
 /**

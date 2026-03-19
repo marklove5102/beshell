@@ -155,20 +155,18 @@ namespace be {
         /**
          * 设置 i2c 外设, 若遇到错误则抛出异常
          * 
-         * ```typescript
-         * options: {
-         *   sda: number,
-         *   scl: number,
-         *   mode: number = 0
-         *   rx_buffer_len: number = 0
-         *   tx_buffer_len: number = 0
-         *   freq: number = 400000
-         *   addr_10bit_en: number = 0
-         *   slave_addr: number|undefined = undefined
-         *   timeout: number = 1000
-         * }
-         * ```
-         * 
+         *     {
+         *         sda: number,
+         *         scl: number,
+         *         mode: number = 0
+         *         rx_buffer_len: number = 0
+         *         tx_buffer_len: number = 0
+         *         freq: number = 400000
+         *         addr_10bit_en: number = 0
+         *         slave_addr: number|undefined = undefined
+         *         timeout: number = 1000
+         *     }
+         *
          * @module serial
          * @class LegacyI2C
          * @method setup

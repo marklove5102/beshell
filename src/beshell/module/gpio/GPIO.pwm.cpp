@@ -285,16 +285,14 @@ namespace be {
  * 配置 GPIO 引脚为 PWM 输出模式，支持多种参数配置。
  * 
  * 配置选项：
- * ```typescript
- * {
- *     mode: number = 0,        // 速度模式：0=低速模式, 1=高速模式
- *     duty: number = 0,        // 初始占空比
- *     freq: number = 1000,     // 频率（Hz）
- *     channel: number = auto,  // PWM 通道（自动分配）
- *     resolution: number = 10, // 分辨率（位），决定占空比精度
- *     timer: number = 0,       // 定时器号
- * }
- * ```
+ *     {
+ *         mode: number = 0,        // 速度模式：0=低速模式, 1=高速模式
+ *         duty: number = 0,        // 初始占空比
+ *         freq: number = 1000,     // 频率（Hz）
+ *         channel: number = auto,  // PWM 通道（自动分配）
+ *         resolution: number = 10, // 分辨率（位），决定占空比精度
+ *         timer: number = 0,       // 定时器号
+ *     }
  * 
  * 示例：
  * ```javascript
@@ -324,12 +322,14 @@ namespace be {
  * @function config
  * @param pin:number GPIO 引脚号
  * @param options:object={} PWM 配置选项
- * @param options.mode:number=0 速度模式：0=低速模式, 1=高速模式
- * @param options.duty:number=0 初始占空比
- * @param options.freq:number=1000 频率（Hz）
- * @param options.channel:number 通道号（自动分配）
- * @param options.resolution:number=10 分辨率（位）
- * @param options.timer:number=0 定时器号
+ *     {
+ *         mode?: number,         // 速度模式：0=低速模式, 1=高速模式，默认 0
+ *         duty?: number,         // 初始占空比，默认 0
+ *         freq?: number,         // 频率（Hz），默认 1000
+ *         channel?: number,      // 通道号，自动分配
+ *         resolution?: number,   // 分辨率（位），默认 10
+ *         timer?: number         // 定时器号，默认 0
+ *     }
  * @throws 引脚未配置为 PWM
  * @throws 无可用通道
  */

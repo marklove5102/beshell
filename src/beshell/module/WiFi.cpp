@@ -1029,7 +1029,7 @@ namespace be {
     /**
      * 执行 WiFi STA 连接操作
      *
-     * 这是底层连接函数，通常在 JS 层被 `connect()` 调用。
+     * 这是底层连接函数，通常在 JS 侧被 `connect()` 调用。
      *
      * @module wifi
      * @function peripheralConnect
@@ -1090,7 +1090,7 @@ namespace be {
     /**
      * WiFi STA 断开连接
      *
-     * 这是底层断开函数，通常在 JS 层被 `disconnect()` 调用。
+     * 这是底层断开函数，通常在 JS 侧被 `disconnect()` 调用。
      *
      * @module wifi
      * @function peripheralDisconnect

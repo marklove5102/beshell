@@ -405,30 +405,6 @@ function top(detail=false) {
      * 
      * 返回系统内存使用情况的详细信息。
      * 
-     * 返回对象的格式：
-     * 
-     * ```javascript
-     * {
-     *   "heap": {
-     *     "total": number,
-     *     "used": number,
-     *     "free": number
-     *   },
-     *   "psram": {
-     *     "total": number,
-     *     "used": number,
-     *     "free": number
-     *   },
-     *   "dma": {
-     *     "total": number,
-     *     "used": number,
-     *     "free": number
-     *   }
-     * }
-     * ```
-     * 
-     * 其中，`total` 表示总内存大小，`used` 表示已用内存大小，`free` 表示剩余内存大小。psram 表示伪静态内存，通常是外挂的IC存储器。
-     * 
      * 示例：
      * ```javascript
      * import * as process from "process"
@@ -458,6 +434,23 @@ function top(detail=false) {
      * @module process
      * @function usage
      * @return object 内存使用情况对象
+     *     {
+     *         heap: {
+     *             total:number,  // 总内存大小
+     *             used:number,   // 已用内存大小
+     *             free:number    // 剩余内存大小
+     *         },
+     *         psram: {
+     *             total:number,  // PSRAM 总大小
+     *             used:number,   // PSRAM 已用大小
+     *             free:number    // PSRAM 剩余大小
+     *         },
+     *         dma: {
+     *             total:number,  // DMA 内存总大小
+     *             used:number,   // DMA 内存已用大小
+     *             free:number    // DMA 内存剩余大小
+     *         }
+     *     }
      */
     JSValue Process::usage(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         (void) argc ;

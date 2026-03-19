@@ -21,8 +21,8 @@ namespace be{
      * |------|---------|------|
      * | UART0 | 默认启用 | 默认激活，无需额外配置 |
      * | USB CDC | `beshell.use<REPLCDC>()` | 需要芯片支持 USB OTG 且 sdkconfig 中开启 |
-     * | WebSocket | JS 层启用 | 使用 `repl.ws.connect()` |
-     * | MQTT | JS 层启用 | 使用 `repl.mqtt.start()` |
+     * | WebSocket | JS 侧启用 | 使用 `repl.ws.connect()` |
+     * | MQTT | JS 侧启用 | 使用 `repl.mqtt.start()` |
      * 
      * > `uart0` 通道是 `BeShell` 默认的 REPL 通道，不需要做额外配置就可以工作。
      * 
@@ -43,7 +43,7 @@ namespace be{
      * // 启用 WebSocket REPL
      * const ws = repl.ws.connect("ws://192.168.1.100:8080")
      * 
-     * // 启用 USB CDC REPL（需要 C++ 层启用 REPLCDC）
+     * // 启用 USB CDC REPL（需要 C++ 侧启用 REPLCDC）
      * repl.cdc.start()
      * 
      * // 启用 MQTT REPL
@@ -327,7 +327,7 @@ namespace be{
  * 
  * ## 前置要求
  * 
- * 必须在 C++ 层先启用 REPLCDC：
+ * 必须在 C++ 侧先启用 REPLCDC：
  * ```cpp
  * #if CONFIG_USB_OTG_SUPPORTED
  *     beshell.use<REPLCDC>() ;

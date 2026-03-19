@@ -177,11 +177,13 @@ namespace be{
      * @class UART
      * @function setup
      * @param options:object 配置选项对象
-     * @param options.tx:number TX 引脚 GPIO 编号
-     * @param options.rx:number RX 引脚 GPIO 编号
-     * @param options.baudrate:number=115200 波特率（可选，默认 115200）
-     * @param options.stopbits:number=1 停止位（可选，默认 1）
-     * @param options.parity:0|2|3=0 校验位（可选，默认 0=无校验，2=偶校验，3=奇校验）
+     *     {
+     *         tx: number,            // TX 引脚 GPIO 编号
+     *         rx: number,            // RX 引脚 GPIO 编号
+     *         baudrate?: number,     // 波特率，默认 115200
+     *         stopbits?: number,     // 停止位，默认 1
+     *         parity?: 0 | 2 | 3     // 校验位：0=无校验，2=偶校验，3=奇校验，默认 0
+     *     }
      * @return undefined
      * @throws UART 驱动已安装
      * @throws 配置失败
@@ -364,11 +366,9 @@ namespace be{
     /**
      * 监听 UART 接收到的数据
      * 
-     * ```typescript
-     * // 回调函数的原型
-     * callback(data:ArrayBuffer)
-     * ```
-     * 
+     * 回调函数的原型：
+     *     callback(data: ArrayBuffer)
+     *
      * @module serial
      * @class UART
      * @function listen
