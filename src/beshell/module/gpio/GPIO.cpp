@@ -320,35 +320,104 @@ namespace be {
 }
 
 
+// ============================================================================
+// 以下函数在 js/gpio.js 中实现，通过 exportValue 导出到 GPIO 模块
+// ============================================================================
+
 /**
- * 监听引脚电平变化并注册回调。
+ * 监听引脚电平变化
+ * 
+ * 注册一个回调函数，当指定引脚的电平发生变化时触发。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as gpio from "gpio"
+ * 
+ * // 监听上升沿（低电平变高电平）
+ * gpio.watch(0, "rising", (pin, level) => {
+ *     console.log(`Pin ${pin} rising, level: ${level}`)
+ * })
+ * 
+ * // 监听下降沿（高电平变低电平）
+ * gpio.watch(0, "falling", (pin, level) => {
+ *     console.log(`Pin ${pin} falling, level: ${level}`)
+ * })
+ * 
+ * // 监听双边沿（任何变化）
+ * gpio.watch(0, "both", (pin, level) => {
+ *     console.log(`Pin ${pin} changed to ${level}`)
+ * })
+ * 
+ * // 按钮检测示例
+ * gpio.setMode(0, "input_pullup")
+ * gpio.watch(0, "falling", () => {
+ *     console.log("Button pressed!")
+ * })
+ * ```
  *
  * @module gpio
  * @function watch
  * @param pin:number GPIO 引脚号
  * @param edge:"rising"|"falling"|"both" 触发的边沿类型
- * @param callback:Function 变化时调用的函数
+ * @param callback:function 变化时调用的回调函数，参数为 (pin, level)
+ * @throws 无效的边沿类型
+ * @throws 回调不是函数
  */
 
-
 /**
- * 取消引脚电平变化的监听。
+ * 取消引脚电平变化监听
+ * 
+ * 移除指定引脚和边沿类型的回调函数。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as gpio from "gpio"
+ * 
+ * function onRising(pin, level) {
+ *     console.log("Rising!")
+ * }
+ * 
+ * // 注册监听
+ * gpio.watch(0, "rising", onRising)
+ * 
+ * // 取消监听
+ * gpio.unwatch(0, "rising", onRising)
+ * ```
  *
  * @module gpio
  * @function unwatch
- * @param gpio:number GPIO 引脚号
+ * @param pin:number GPIO 引脚号
  * @param edge:"rising"|"falling"|"both" 取消的边沿类型
- * @param callback:Function 要移除的回调函数
+ * @param callback:function 要移除的回调函数
+ * @throws 无效的边沿类型
+ * @throws 回调不是函数
  */
 
-
 /**
- * GPIO 闪烁，执行该函数后，指定的引脚会持续高低电平切换。
+ * GPIO 闪烁
  * 
+ * 使指定引脚持续高低电平切换（闪烁）。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as gpio from "gpio"
+ * 
+ * // LED 每秒闪烁一次（周期 2 秒）
+ * const timerId = gpio.blink(2, 1000)
+ * 
+ * // 5 秒后停止闪烁
+ * setTimeout(() => {
+ *     clearInterval(timerId)
+ *     gpio.write(2, 0)  // 关闭 LED
+ * }, 5000)
+ * 
+ * // 快速闪烁（100ms 周期）
+ * gpio.blink(2, 100)
+ * ```
+ *
  * @module gpio
  * @function blink
  * @param pin:number 引脚序号
- * @param time:number 间隔时间，单位毫秒，闪烁的半周期
- * 
- * @return number 定时器id，可使用 `clearTimeout()` 停止闪烁。
+ * @param time:number=1000 间隔时间（毫秒），闪烁的半周期
+ * @return number 定时器 id，可使用 `clearInterval()` 停止闪烁
  */

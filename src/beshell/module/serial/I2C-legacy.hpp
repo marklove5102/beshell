@@ -44,8 +44,8 @@ namespace be {
      * 
      * 模块 [serial](overview.md) 创建了和硬件对应的 I2C 实例，`import serial` 即可。
      * 
-     * @module [serial](../serial)
-     * @class I2C
+     * @module serial
+     * @class LegacyI2C
      */
     class I2C: public be::NativeClass {
         DECLARE_NCLASS_META
@@ -169,8 +169,8 @@ namespace be {
          * }
          * ```
          * 
-         * @module [serial](../serial)
-         * @class I2C
+         * @module serial
+         * @class LegacyI2C
          * @method setup
          * 
          * @param options:object
@@ -186,8 +186,8 @@ namespace be {
         /**
          * 测试总线上的设备是否存在
          * 
-         * @module [serial](../serial)
-         * @class I2C
+         * @module serial
+         * @class LegacyI2C
          * @method ping
          * 
          * @param addr:number 设备地址(0-127)
@@ -198,8 +198,8 @@ namespace be {
         /**
          * 在总线上扫描设备给定地址范围的所有设备，在控制台上输出存在的地址
          * 
-         * @module [serial](../serial)
-         * @class I2C
+         * @module serial
+         * @class LegacyI2C
          * @method scan
          * 
          * @param from:number=0 设备地址(0-127)
@@ -217,8 +217,8 @@ namespace be {
          * * 否则返回 false (总线上设备可能不存在)
          * * 其他错误抛出异常
          * 
-         * @module [serial](../serial)
-         * @class I2C
+         * @module serial
+         * @class LegacyI2C
          * @method send
          * 
          * @param addr:number 设备地址(0-127)
@@ -235,8 +235,8 @@ namespace be {
          * * 否则返回 false (总线上设备可能不存在)
          * * 其他错误抛出异常
          * 
-         * @module [serial](../serial)
-         * @class I2C
+         * @module serial
+         * @class LegacyI2C
          * @method write8
          * 
          * @param devAddr:number 设备地址(0-127)
@@ -253,8 +253,8 @@ namespace be {
          * * 否则返回 false (总线上设备可能不存在)
          * * 其他错误抛出异常
          * 
-         * @module [serial](../serial)
-         * @class I2C
+         * @module serial
+         * @class LegacyI2C
          * @method write16
          * 
          * @param devAddr:number 设备地址(0-127)
@@ -271,8 +271,8 @@ namespace be {
          * * 否则返回 false (总线上设备可能不存在)
          * * 其他错误抛出异常
          * 
-         * @module [serial](../serial)
-         * @class I2C
+         * @module serial
+         * @class LegacyI2C
          * @method write32
          * 
          * @param devAddr:number 设备地址(0-127)
@@ -290,8 +290,8 @@ namespace be {
          * * 如果总线上设备不存在则返回 null
          * * 其他错误抛出异常
          * 
-         * @module [serial](../serial)
-         * @class I2C
+         * @module serial
+         * @class LegacyI2C
          * @method recv
          * 
          * @param addr:number 设备地址(0-127)
@@ -306,8 +306,8 @@ namespace be {
          * 
          * * 抛出错误异常
          * 
-         * @module [serial](../serial)
-         * @class I2C
+         * @module serial
+         * @class LegacyI2C
          * @method recvUint8
          * 
          * @param addr:number 设备地址(0-127)

@@ -6,7 +6,47 @@
 using namespace std ;
 
 namespace be {
-    
+
+    /**
+     * SPI 总线类
+     * 
+     * 用于配置和管理 ESP32 的 SPI 总线。SPI 是一种高速同步串行通信协议，
+     * 常用于连接显示屏、SD 卡、以太网模块、传感器等外设。
+     * 
+     * ESP32 通常有 3 个 SPI 总线（SPI1、SPI2、SPI3），其中：
+     * - SPI1 通常用于连接 Flash，不建议用户使用
+     * - SPI2 和 SPI3 可供用户自由使用
+     * 
+     * serial 模块会自动创建 SPI 实例并通过 `spi1`, `spi2`（部分型号有 `spi3`）导出。
+     * 用户直接通过 serial 模块访问这些实例，无需手动创建。
+     * 
+     * **不同芯片型号导出的 SPI 对象不同**：
+     * - ESP32/ESP32-S3：spi1, spi2
+     * - ESP32-C2/C3/C6/H2：spi1, spi2
+     * - ESP32-P4：spi1, spi2, spi3
+     * 
+     * 示例：
+     * ```javascript
+     * import * as serial from "serial"
+     * 
+     * // 访问 SPI2 总线实例（推荐）
+     * const spi = serial.spi2
+     * 
+     * // 配置 SPI 引脚
+     * spi.setup({
+     *     miso: 19,  // MISO 引脚（可选）
+     *     mosi: 23,  // MOSI 引脚（可选）
+     *     sck: 18    // 时钟引脚（必需）
+     * })
+     * 
+     * // 获取总线编号
+     * console.log("SPI 总线:", spi.spiNum())
+     * ```
+     * 
+     * @class SPI
+     * @module serial
+     * @extends NativeClass
+     */
     SPI * SPI::spi0 = nullptr ;    
     #if SOC_SPI_PERIPH_NUM > 1
     SPI * SPI::spi1 = nullptr ;
@@ -69,20 +109,103 @@ namespace be {
     int SPI::spiNum() const {
         return busnum ;
     }
+    /**
+     * 获取当前 SPI 实例的总线编号
+     * 
+     * 示例：
+     * ```javascript
+     * import * as serial from "serial"
+     * 
+     * // 获取 SPI2 总线实例
+     * const spi = serial.spi2
+     * 
+     * // 获取总线编号
+     * console.log(spi.spiNum())  // 输出: 2
+     * ```
+     *
+     * @module serial
+     * @class SPI
+     * @function spiNum
+     * @return number SPI 总线编号
+     */
     JSValue SPI::spiNum(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
         THIS_NCLASS(SPI, that)
         return JS_NewInt32(ctx, that->busnum) ;
     }
 
     /**
-     * options: {
-     *   miso=-1
-     *   mosi=-1
-     *   sck
-     *   quadwp_io_num=-1
-     *   quadhd_io_num=-1
-     *   max_transfer_sz=20480
+     * 配置并初始化 SPI 总线
+     * 
+     * 初始化 SPI 总线，配置引脚和传输参数。SPI 总线初始化后，
+     * 可以被多个 SPI 设备共享使用（通过不同的 CS 引脚）。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as serial from "serial"
+     * 
+     * // 获取 SPI2 总线实例
+     * const spi = serial.spi2
+     * 
+     * // 基本配置（半双工模式，只需要 MOSI 和 SCK）
+     * let ret = spi.setup({
+     *     mosi: 23,  // MOSI 引脚
+     *     sck: 18    // 时钟引脚
+     * })
+     * if(ret != 0) {
+     *     console.log("SPI 初始化失败")
      * }
+     * 
+     * // 全双工配置（需要 MISO、MOSI 和 SCK）
+     * const spi2 = serial.spi2
+     * ret = spi2.setup({
+     *     miso: 19,  // MISO 引脚
+     *     mosi: 23,  // MOSI 引脚
+     *     sck: 18,   // 时钟引脚
+     *     max_transfer_sz: 4096  // 最大传输字节数
+     * })
+     * 
+     * // 与 W5500 以太网模块配合使用
+     * import { W5500 } from "eth"
+     * const eth = new W5500()
+     * 
+     * // 先初始化 SPI 总线
+     * const spi = serial.spi2
+     * spi.setup({
+     *     mosi: 23,
+     *     miso: 19,
+     *     sck: 18
+     * })
+     * 
+     * // 然后初始化 W5500（使用相同的 SPI 总线）
+     * eth.setup({
+     *     spi: 2,   // 使用 SPI2（对应 serial.spi2）
+     *     cs: 5     // CS 引脚
+     * })
+     * 
+     * // 与 SD 卡配合使用
+     * import { SDCard } from "sdcard"
+     * const sd = new SDCard()
+     * 
+     * // 使用 SPI2 初始化 SD 卡
+     * sd.setup({
+     *     spi: 2,       // 使用 SPI2（对应 serial.spi2）
+     *     cs: 13,       // CS 引脚
+     *     mount: "/sd"  // 挂载路径
+     * })
+     * ```
+     *
+     * @module serial
+     * @class SPI
+     * @function setup
+     * @param options:object 配置选项对象
+     * @param options.miso:number=-1 MISO 引脚 GPIO 编号（可选）
+     * @param options.mosi:number=-1 MOSI 引脚 GPIO 编号（可选）
+     * @param options.sck:number SCK 引脚 GPIO 编号（必需）
+     * @param options.quadwp_io_num:number=-1 Quad WP IO 编号（可选）
+     * @param options.quadhd_io_num:number=-1 Quad HD IO 编号（可选）
+     * @param options.max_transfer_sz:number=20480 最大传输大小（可选，默认 20480）
+     * @return number 错误代码，0 表示成功
+     * @throws SPI 总线初始化失败
      */
     JSValue SPI::setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
         THIS_NCLASS(SPI, that)

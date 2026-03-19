@@ -15,6 +15,56 @@ namespace be{
     static inline uart_port_t to_uart_port(int port) {
         return static_cast<uart_port_t>(port);
     }
+
+    /**
+     * UART 串口类
+     * 
+     * 用于配置和管理 ESP32 的 UART 串口。UART 是一种异步串行通信协议，
+     * 常用于连接 GPS 模块、蓝牙模块、调试输出等。
+     * 
+     * ESP32 通常有 3 个 UART 端口（UART0、UART1、UART2），部分型号有更多。
+     * - UART0 通常用于下载程序和调试输出
+     * - UART1 和 UART2 可供用户自由使用
+     * 
+     * serial 模块会自动创建 UART 实例并通过 `uart0`, `uart1`, `uart2` 等导出。
+     * 用户直接通过 serial 模块访问这些实例，无需手动创建。
+     * 
+     * **不同芯片型号导出的 UART 对象不同**：
+     * - ESP32/ESP32-S3/C6：uart0, uart1, uart2（3 个 UART）
+     * - ESP32-S2/C2/C3/H2：uart0, uart1（2 个 UART，无 uart2）
+     * - ESP32-P4：uart0-uart4（5 个 HP UART），另有 uartlp0（低功耗 UART）
+     * 
+     * 示例：
+     * ```javascript
+     * import * as serial from "serial"
+     * 
+     * // 访问 UART2 实例（推荐）
+     * const uart = serial.uart2
+     * 
+     * // 配置 UART
+     * uart.setup({
+     *     tx: 17,        // TX 引脚
+     *     rx: 16,        // RX 引脚
+     *     baudrate: 9600  // 波特率
+     * })
+     * 
+     * // 发送数据
+     * uart.write("Hello UART!")
+     * 
+     * // 接收数据
+     * const data = uart.read(100)  // 读取最多 100 字节
+     * console.log("Received:", data)
+     * 
+     * // 监听接收数据
+     * uart.listen((data) => {
+     *     console.log("Received:", data)
+     * })
+     * ```
+     * 
+     * @class UART
+     * @module serial
+     * @extends NativeClass
+     */
     
     UART * UART::uart0 = nullptr ;
     #if SOC_UART_HP_NUM>1
@@ -85,21 +135,56 @@ namespace be{
     //     UART_PARITY_ODD = 0x3        // 奇校验位
     // } uart_parity_t;
     /**
+     * 配置并初始化 UART
      * 
+     * 初始化 UART 串口，配置引脚、波特率等参数。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as serial from "serial"
+     * 
+     * // 获取 UART2 实例
+     * const uart = serial.uart2
+     * 
+     * // 基本配置
+     * uart.setup({
+     *     tx: 17,   // TX 引脚
+     *     rx: 16    // RX 引脚
+     * })
+     * 
+     * // 完整配置
+     * uart.setup({
+     *     tx: 17,
+     *     rx: 16,
+     *     baudrate: 9600,   // 波特率（默认 115200）
+     *     stopbits: 1,      // 停止位（默认 1）
+     *     parity: 0         // 校验位：0=无校验（默认），2=偶校验，3=奇校验
+     * })
+     * ```
+     *
      * options 格式：
      * ```javascript
      * {
-     *    tx:number,
-     *    rx:number,
-     *    baudrate:number=115200,
-     *    stopbits:number=1,
-     *    parity:0|2|3=0,
+     *    tx:number,           // TX 引脚 GPIO 编号（必需）
+     *    rx:number,           // RX 引脚 GPIO 编号（必需）
+     *    baudrate:number=115200,  // 波特率（可选，默认 115200）
+     *    stopbits:number=1,   // 停止位（可选，默认 1）
+     *    parity:0|2|3=0,      // 校验位（可选，默认 0=无校验，2=偶校验，3=奇校验）
      * }
      * ```
-     * parity: 0=none, 2=even, 3=odd
      *
-     * @param options:object uart options
+     * @module serial
+     * @class UART
+     * @function setup
+     * @param options:object 配置选项对象
+     * @param options.tx:number TX 引脚 GPIO 编号
+     * @param options.rx:number RX 引脚 GPIO 编号
+     * @param options.baudrate:number=115200 波特率（可选，默认 115200）
+     * @param options.stopbits:number=1 停止位（可选，默认 1）
+     * @param options.parity:0|2|3=0 校验位（可选，默认 0=无校验，2=偶校验，3=奇校验）
      * @return undefined
+     * @throws UART 驱动已安装
+     * @throws 配置失败
      */
     JSValue UART::setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(UART, uart)
@@ -160,15 +245,19 @@ namespace be{
 
 
     /**
-     * 从UART读取数据
+     * 从 UART 读取数据
      * 
-     * 读取指定长度的数据，返回一个ArrayBuffer对象。
-     * 如果没有数据可读，将返回一个空的ArrayBuffer。
+     * 读取指定长度的数据，返回一个 ArrayBuffer 对象。如果没有数据可读，将返回一个空的 ArrayBuffer。
      * 
+     * 通常情况下接收方无法确定数据到达的时机，再加上 JS 引擎主循环的延迟，`read()` 有时无法满足通讯需求，推荐使用 `listen()`。
+     * 
+     * @module serial
+     * @class UART
      * @function read
      * @param len:number 要读取的字节数
-     * @param timeout:number=20 读取超时时间（毫秒），默认为20毫秒
+     * @param timeout:number=20 读取超时时间（毫秒，默认 20）
      * @return ArrayBuffer 读取到的数据
+     * @throws 内存分配失败
      */
     JSValue UART::read(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(UART, uart)
@@ -184,6 +273,17 @@ namespace be{
         return JS_NewArrayBuffer(ctx, buff, readlen, freeArrayBuffer, NULL, false) ;
     }
 
+    /**
+     * 向 UART 写入数据
+     * 
+     * > 当参数 data 是一个整数数组时，等效于 `new Uint8Array(data)`
+     * 
+     * @module serial
+     * @class UART
+     * @function write
+     * @param data:ArrayBuffer|string|number[] 要写入的数据
+     * @return number 实际写入的字节数
+     */
     JSValue UART::write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(UART, uart)
         ASSERT_ARGC(1)
@@ -261,6 +361,22 @@ namespace be{
     }
 
     #define DATA_QUEUE_LEN 10
+    /**
+     * 监听 UART 接收到的数据
+     * 
+     * ```typescript
+     * // 回调函数的原型
+     * callback(data:ArrayBuffer)
+     * ```
+     * 
+     * @module serial
+     * @class UART
+     * @function listen
+     * @param callback:function 数据接收回调函数，参数为 ArrayBuffer
+     * @return undefined
+     * @throws UART 驱动未安装
+     * @throws 回调不是函数
+     */
     JSValue UART::listen(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(UART, uart)
         
@@ -291,6 +407,14 @@ namespace be{
         return JS_UNDEFINED ;
     }
 
+    /**
+     * 关闭 UART 并释放资源
+     * 
+     * @module serial
+     * @class UART
+     * @function unsetup
+     * @return undefined
+     */
     JSValue UART::unsetup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(UART, uart)
 
@@ -320,6 +444,16 @@ namespace be{
         uart_driver_delete(to_uart_port(uart->m_uartNum)) ;
         return JS_UNDEFINED ;
     }
+    /**
+     * 检查 UART 驱动是否已安装
+     * 
+     * 是 ESP IDF `uart_is_driver_installed` 的封装，无论 c++ 还是 js 启用了 uart ，该函数都会返回 true。
+     *
+     * @module serial
+     * @class UART
+     * @function isInstalled
+     * @return bool 是否已安装
+     */
     JSValue UART::isInstalled(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(UART, uart)
         return uart_is_driver_installed(to_uart_port(uart->m_uartNum))? JS_TRUE : JS_FALSE ;

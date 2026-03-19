@@ -35,6 +35,31 @@ static inline void list_add_tail(struct list_head *el, struct list_head *head)
 
 namespace be {
 
+    /**
+     * Loader 模块加载器
+     * 
+     * 提供模块加载相关的底层功能，包括同步导入模块、编译字节码、
+     * 获取当前文件路径等功能。通常不需要直接使用，除非需要动态加载模块。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as loader from "loader"
+     * 
+     * // 获取当前文件的完整路径
+     * console.log(loader.__filename())  // 例如: "/app/main.js"
+     * 
+     * // 获取当前文件所在目录
+     * console.log(loader.__dirname())   // 例如: "/app"
+     * 
+     * // 同步导入模块（相对于当前文件路径解析）
+     * const utils = loader.importSync("./utils.js")
+     * 
+     * // 编译 JS 文件为字节码（.bin）
+     * loader.compile("/app/main.js", "/app/main.js.bin")
+     * ```
+     * 
+     * @module loader
+     */
     class JSLoader: public NativeModule {
     public:
         using NativeModule::NativeModule;
@@ -49,7 +74,31 @@ namespace be {
             exportFunction("exportValue",exportValue) ;
             exportFunction("allModuleNames",allModuleNames) ;
         }
-        
+
+        /**
+         * 同步导入模块
+         * 
+         * 相对于当前文件路径同步加载并执行指定模块，返回模块的导出对象。
+         * 与 ES6 的动态 import() 不同，这是同步执行的。
+         * 
+         * 示例：
+         * ```javascript
+         * import * as loader from "loader"
+         * 
+         * // 导入相对路径的模块
+         * const config = loader.importSync("./config.js")
+         * console.log(config.default)
+         * 
+         * // 导入内置模块
+         * const fs = loader.importSync("fs")
+         * ```
+         * 
+         * @module loader
+         * @function importSync
+         * @param moduleName:string 模块名称或路径
+         * @return object 模块的导出对象（namespace）
+         * @throws 找不到模块时抛出异常
+         */
         static JSValue importSync(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
             ASSERT_ARGC(1)
             const char * modulename = JS_ToCString(ctx, argv[0]) ;
@@ -87,6 +136,28 @@ namespace be {
             return ns ;
         }
 
+        /**
+         * 获取当前文件的完整路径
+         * 
+         * 返回调用此函数的 JavaScript 源文件的完整路径。
+         * 可用于获取当前正在执行的脚本文件位置。
+         * 
+         * 示例：
+         * ```javascript
+         * import * as loader from "loader"
+         * 
+         * // 在 /app/main.js 中执行
+         * console.log(loader.__filename())  // 输出: "/app/main.js"
+         * 
+         * // 获取上层调用者的文件路径
+         * console.log(loader.__filename(2))
+         * ```
+         * 
+         * @module loader
+         * @function __filename
+         * @param stack:number=1 调用栈层级，1 表示当前文件，2 表示调用者，以此类推
+         * @return string 文件的完整绝对路径
+         */
         static JSValue jsFilename(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
             int32_t stack = 1 ;
             if(argc>0) {
@@ -109,6 +180,28 @@ namespace be {
 
             return val2 ;
         }
+        /**
+         * 获取当前文件所在目录
+         * 
+         * 返回调用此函数的 JavaScript 源文件所在的目录路径。
+         * 常用于构建相对于当前文件的资源路径。
+         * 
+         * 示例：
+         * ```javascript
+         * import * as loader from "loader"
+         * 
+         * // 在 /app/main.js 中执行
+         * console.log(loader.__dirname())  // 输出: "/app"
+         * 
+         * // 构建相对于当前文件的配置路径
+         * const configPath = loader.__dirname() + "/config.json"
+         * ```
+         * 
+         * @module loader
+         * @function __dirname
+         * @param stack:number=1 调用栈层级，1 表示当前文件，2 表示调用者，以此类推
+         * @return string 文件所在目录的绝对路径
+         */
         static JSValue jsDirname(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
             int32_t stack = 1 ;
@@ -137,6 +230,40 @@ namespace be {
 
             return val ;
         }
+        /**
+         * 编译 JavaScript 文件为字节码
+         * 
+         * 将 JavaScript 源文件编译为 QuickJS 字节码（.bin 文件）。
+         * 字节码文件加载速度更快，且可以保护源代码不被轻易查看。
+         * 
+         * 支持的输出格式：
+         * - `.bin` - 纯字节码文件
+         * - `.js.bin` - 带源码标记的字节码文件
+         * 
+         * 示例：
+         * ```javascript
+         * import * as loader from "loader"
+         * import * as fs from "fs"
+         * 
+         * // 编译为同名的 .bin 文件
+         * loader.compile("/app/main.js")
+         * // 生成: /app/main.js.bin
+         * 
+         * // 指定输出路径
+         * loader.compile("/app/main.js", "/app/main.bin")
+         * 
+         * // 后续可以直接导入字节码文件
+         * // import * as main from "/app/main.js.bin"
+         * ```
+         * 
+         * @module loader
+         * @function compile
+         * @param source:string 源 JavaScript 文件路径
+         * @param dist:string 输出字节码文件路径，默认为源文件路径 + ".bin"
+         * @return undefined
+         * @throws 读取源文件失败时抛出异常
+         * @throws 写入目标文件失败时抛出异常
+         */
         static JSValue compile(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
             ASSERT_ARGC(1)
 
@@ -171,6 +298,33 @@ namespace be {
 
             return JS_UNDEFINED ;
         }
+        /**
+         * 向指定模块导出值
+         * 
+         * 动态地向已加载的模块添加导出值。这通常用于 C++ 层或 JS 运行时
+         * 向模块动态注入内容。
+         * 
+         * 示例：
+         * ```javascript
+         * import * as loader from "loader"
+         * 
+         * // 向 "myModule" 模块导出名为 "version" 的值
+         * loader.exportValue("myModule", "version", "1.0.0")
+         * 
+         * // 在其他地方导入使用
+         * // import { version } from "myModule"
+         * // console.log(version)  // "1.0.0"
+         * ```
+         * 
+         * @module loader
+         * @function exportValue
+         * @param moduleName:string 目标模块名称
+         * @param valueName:string 要导出的变量名
+         * @param value:any 要导出的值
+         * @return undefined
+         * @throws 模块不存在时抛出异常
+         * @throws 导出失败时抛出异常
+         */
         static JSValue exportValue(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
             ASSERT_ARGC(3)
             JSModuleDef * mdef = JS_FindModuleWithNS(ctx,argv[0]) ;
@@ -188,6 +342,31 @@ namespace be {
             return JS_UNDEFINED ;
         }
 
+        /**
+         * 获取所有已注册模块的名称列表
+         * 
+         * 返回当前环境中所有已注册的内置模块名称数组。
+         * 包括通过 `ModuleLoader` 注册的所有原生模块。
+         * 
+         * 示例：
+         * ```javascript
+         * import * as loader from "loader"
+         * 
+         * // 获取所有模块名称
+         * const modules = loader.allModuleNames()
+         * console.log(modules)
+         * // 输出类似: ["fs", "gpio", "serial", "loader", "process", ...]
+         * 
+         * // 检查某个模块是否存在
+         * if (modules.includes("wifi")) {
+         *     console.log("wifi 模块可用")
+         * }
+         * ```
+         * 
+         * @module loader
+         * @function allModuleNames
+         * @return Array\<string\> 模块名称数组
+         */
         static JSValue allModuleNames(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
             JSValue arr = JS_NewArray(ctx) ;
             ModuleLoader * mloader = & JSEngine::fromJSContext(ctx)->mloader ;

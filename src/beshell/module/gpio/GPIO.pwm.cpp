@@ -258,14 +258,6 @@ namespace be {
         return JS_UNDEFINED;
     }
 
-    /**
-     * 获取芯片支持的最大 PWM 速度模式值。
-     *
-     * @module gpio
-     * @function pwmMaxSpeedMode
-     *
-     * @return number 最大速度模式
-     */
     JSValue GPIO::pwmMaxSpeedMode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return JS_NewUint32(ctx, LEDC_SPEED_MODE_MAX) ;
     }
@@ -274,49 +266,176 @@ namespace be {
 
 
 
+// ============================================================================
+// pwm 对象在 js/gpio.js 中定义，通过 exportValue 导出到 GPIO 模块
+// ============================================================================
+
 /**
- * 配置指定引脚的 PWM 输出并记录所占用的通道。
- *
- * options: {
- *     mode: number = LEDC_LOW_SPEED_MODE,  // LEDC speed mode
- *     duty: number = 0,                    // 占空比
- *     freq: number = 1000,                 // 频率
- *     channel: number = 0,                 // 通道
- *     resolution: number = 10,             // 分辨率
- *     timer: number = 0,                   // 定时器号
- *     clk: number = LEDC_AUTO_CLK,         // 时钟配置
- *     intr: number = LEDC_INTR_DISABLE     // 中断配置
- * }
+ * PWM 对象
+ * 
+ * 提供脉冲宽度调制（PWM）输出功能，用于控制 LED 亮度、电机速度、舵机角度等。
  * 
  * @module gpio
- * @function configPWM
- * @param pin:number GPIO 引脚号
- * @param options:object={} PWM 配置，可包含 mode、channel、freq、duty 等字段
+ * @object pwm
  */
 
 /**
- * 写入 PWM 占空比并可选立刻更新硬件状态。
+ * 配置指定引脚的 PWM 输出
+ * 
+ * 配置 GPIO 引脚为 PWM 输出模式，支持多种参数配置。
+ * 
+ * 配置选项：
+ * ```typescript
+ * {
+ *     mode: number = 0,        // 速度模式：0=低速模式, 1=高速模式
+ *     duty: number = 0,        // 初始占空比
+ *     freq: number = 1000,     // 频率（Hz）
+ *     channel: number = auto,  // PWM 通道（自动分配）
+ *     resolution: number = 10, // 分辨率（位），决定占空比精度
+ *     timer: number = 0,       // 定时器号
+ * }
+ * ```
+ * 
+ * 示例：
+ * ```javascript
+ * import * as gpio from "gpio"
+ * 
+ * // 基本配置 - LED 调光
+ * gpio.pwm.config(2, { freq: 1000, duty: 512 })
+ * 
+ * // 配置舵机（50Hz，1-2ms 脉宽）
+ * gpio.pwm.config(18, { 
+ *     freq: 50,           // 50Hz = 20ms 周期
+ *     resolution: 16,     // 16位分辨率
+ *     duty: 4915          // 1.5ms 脉宽 (居中)
+ * })
+ * 
+ * // 修改占空比
+ * gpio.pwm.write(2, 256)   // 25% 亮度
+ * gpio.pwm.write(2, 768)   // 75% 亮度
+ * gpio.pwm.write(2, 1023)  // 100% 亮度
+ * 
+ * // 停止 PWM
+ * gpio.pwm.stop(2)
+ * ```
  *
  * @module gpio
- * @function writePWM
+ * @object pwm
+ * @function config
  * @param pin:number GPIO 引脚号
- * @param value:number 占空比数值
- * @param update:boolean=true 是否立即调用底层更新
+ * @param options:object={} PWM 配置选项
+ * @param options.mode:number=0 速度模式：0=低速模式, 1=高速模式
+ * @param options.duty:number=0 初始占空比
+ * @param options.freq:number=1000 频率（Hz）
+ * @param options.channel:number 通道号（自动分配）
+ * @param options.resolution:number=10 分辨率（位）
+ * @param options.timer:number=0 定时器号
+ * @throws 引脚未配置为 PWM
+ * @throws 无可用通道
  */
 
 /**
- * 手动触发指定引脚的 PWM 占空比更新。
+ * 写入 PWM 占空比
+ * 
+ * 设置指定引脚的 PWM 占空比值。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as gpio from "gpio"
+ * 
+ * // 配置 PWM
+ * gpio.pwm.config(2, { resolution: 10 })  // 10位分辨率，范围 0-1023
+ * 
+ * // 设置不同占空比
+ * gpio.pwm.write(2, 0)      // 0%   (完全关闭)
+ * gpio.pwm.write(2, 256)    // 25%  
+ * gpio.pwm.write(2, 512)    // 50%
+ * gpio.pwm.write(2, 768)    // 75%
+ * gpio.pwm.write(2, 1023)   // 100% (完全打开)
+ * 
+ * // 渐变效果
+ * for (let i = 0; i <= 1023; i += 10) {
+ *     gpio.pwm.write(2, i)
+ *     process.sleep(10)
+ * }
+ * ```
  *
  * @module gpio
- * @function updatePWM
+ * @object pwm
+ * @function write
  * @param pin:number GPIO 引脚号
+ * @param value:number 占空比值（0 到 2^resolution - 1）
+ * @param update:boolean=true 是否立即更新硬件
+ * @throws 引脚未配置为 PWM
  */
 
 /**
- * 停止引脚的 PWM 输出并释放对应通道。
+ * 更新 PWM 输出
+ * 
+ * 手动触发 PWM 占空比更新（通常在批量写入后使用）。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as gpio from "gpio"
+ * 
+ * // 配置多个 PWM 引脚
+ * gpio.pwm.config(2, { freq: 1000 })
+ * gpio.pwm.config(4, { freq: 1000 })
+ * 
+ * // 批量写入（不立即更新）
+ * gpio.pwm.write(2, 512, false)
+ * gpio.pwm.write(4, 768, false)
+ * 
+ * // 同时更新所有通道
+ * gpio.pwm.update(2)
+ * gpio.pwm.update(4)
+ * ```
  *
  * @module gpio
- * @function stopPWM
+ * @object pwm
+ * @function update
  * @param pin:number GPIO 引脚号
+ * @throws 引脚未配置为 PWM
+ */
+
+/**
+ * 停止 PWM 输出
+ * 
+ * 停止指定引脚的 PWM 输出并释放通道资源。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as gpio from "gpio"
+ * 
+ * // 配置并启动 PWM
+ * gpio.pwm.config(2, { freq: 1000, duty: 512 })
+ * 
+ * // ... 使用 PWM ...
+ * 
+ * // 停止 PWM
+ * gpio.pwm.stop(2)
+ * 
+ * // 引脚恢复为普通 GPIO
+ * gpio.setMode(2, "output")
+ * gpio.write(2, 0)
+ * ```
+ *
+ * @module gpio
+ * @object pwm
+ * @function stop
+ * @param pin:number GPIO 引脚号
+ * @throws 引脚未配置为 PWM
+ */
+
+/**
+ * 最大速度模式
+ * 
+ * 高速模式常量，用于 pwm.config() 的 mode 参数。
+ * 
+ * @module gpio
+ * @object pwm
+ * @name maxSpeedMode
+ * @type number
+ * @readonly
  */
 

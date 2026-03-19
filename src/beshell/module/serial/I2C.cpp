@@ -26,7 +26,53 @@ using namespace std ;
     
 namespace be {
 
-    
+    /**
+     * I2C 总线类
+     * 
+     * 用于配置和管理 ESP32 的 I2C 总线。I2C 是一种两线串行通信协议，
+     * 常用于连接传感器、显示屏、EEPROM 等外设。
+     * 
+     * ESP32 通常有 2 个 I2C 总线（I2C0、I2C1），部分型号还有低功耗 I2C（I2C LP）。
+     * serial 模块会自动创建 I2C 实例并通过 `i2c0`, `i2c1` 等导出。
+     * 用户直接通过 serial 模块访问这些实例，无需手动创建。
+     * 
+     * **不同芯片型号导出的 I2C 对象不同**：
+     * - ESP32/ESP32-S2/S3/H2/P4：i2c0, i2c1（2 个 I2C）
+     * - ESP32-C2/C3/C6：i2c0（只有 1 个 I2C）
+     * 
+     * 示例：
+     * ```javascript
+     * import * as serial from "serial"
+     * 
+     * // 访问 I2C0 总线实例（推荐）
+     * const i2c = serial.i2c0
+     * 
+     * // 配置 I2C 总线
+     * i2c.setup({
+     *     sda: 21,  // SDA 引脚
+     *     scl: 22,  // SCL 引脚
+     *     freq: 400000  // 时钟频率 400kHz
+     * })
+     * 
+     * // 扫描总线上的设备
+     * i2c.scan()
+     * 
+     * // 添加设备配置
+     * i2c.addDevice({
+     *     addr: 0x68,  // 设备地址（如 MPU6050）
+     *     freq: 100000
+     * })
+     * 
+     * // 读写寄存器
+     * i2c.write8(0x68, 0x6B, 0x00)  // 向地址 0x68 的寄存器 0x6B 写入 0x00
+     * const data = i2c.readU8(0x68, 0x75)  // 从寄存器 0x75 读取数据
+     * console.log("Who am I:", data)
+     * ```
+     * 
+     * @class I2C
+     * @module serial
+     * @extends NativeClass
+     */
     DEFINE_NCLASS_META(I2C, NativeClass)
 
     I2C * I2C::i2c0 = nullptr ;
@@ -190,30 +236,45 @@ namespace be {
     /**
      * 配置并启动 I2C 总线。
      * 
-     * options: {
-     *     sda: number ,                        // GPIO number for SDA
-     *     scl: number ,                        // GPIO number for SCL
-     *     mode: number = 1                     // 0: slaver , 1: master
-     *     core: number = 0                     // cpu core to run i2c driver
+     * 初始化 I2C 总线，配置 SDA/SCL 引脚、主从模式等参数。
+     * 当前仅支持主模式（master mode），从模式尚未实现。
      * 
-     *     dev: [
+     * options 参数说明：
+     * ```js
+     * {
+     *     sda: number,              // SDA 引脚 GPIO 编号（必需）
+     *     scl: number,              // SCL 引脚 GPIO 编号（必需）
+     *     mode: number = 1,         // 模式：0=从机, 1=主机（默认主机）
+     *     core: number = 0,         // 运行 I2C 驱动的 CPU 核心编号
+     *     clk_source: number,       // 时钟源（默认 I2C_CLK_SRC_DEFAULT）
+     *     glitch_ignore_cnt: number = 7,  // 毛刺过滤计数
+     *     internal_pullup: bool = true,   // 使能内部上拉
+     *     allow_pd: bool = false,         // 允许断电
+     *     intr_priority: number = 0,      // 中断优先级
+     *     trans_queue_depth: number = 0,  // 事务队列深度
+     *     dev: [                      // 预配置设备数组（可选）
      *         {
-     *             addr: number ,               // device address
-     *             addrBit10: bool = false ,    // device address
-     *             regAddrBits: number = 8 ,    // register address bits , 8 or 16
-     *             regBits: number = 8 ,        // register value bits , 8 or 16
-     *             freq: number = 100000 ,      // clock speed for master mode
-     *             timeout: number = 1000 ,     // timeout in us
-     *             ackCheck: bool = true ,      // enable ACK check
-     *         } , ...
+     *             addr: number,           // 设备地址（必需）
+     *             addrBit10: bool = false,    // 是否使用 10 位地址
+     *             regAddrBits: number = 8,    // 寄存器地址位数（8/16/32）
+     *             regBits: number = 8,        // 寄存器值位数（8/16/32）
+     *             freq: number = 100000,      // 时钟频率（Hz）
+     *             timeout: number = 1000,     // 超时时间（微秒）
+     *             ackCheck: bool = true       // 是否启用 ACK 检查
+     *         }
      *     ]
      * }
+     * ```
      * 
      * @module serial
      * @class I2C
      * @function setup
-     * @param options: Object
+     * @param options:object 配置选项对象
      * @return undefined
+     * @throws 缺少 sda 或 scl 配置
+     * @throws I2C 总线初始化失败
+     * @throws 添加预配置设备失败
+     * @throws 从模式不受支持
      */
     JSValue I2C::setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(I2C, that)
@@ -318,22 +379,33 @@ namespace be {
     }
 
     /**
-     * 添加一个设备的信息
+     * 向 I2C 总线添加一个设备。
      * 
-     * options: {
-     *     addr: number ,               // device address
-     *     addrBit10: bool = false ,    // device address
-     *     regBits: number = 8 ,        // register address bits , 8 or 16
-     *     freq: number = 100000 ,      // clock speed for master mode
-     *     timeout: number = 1000 ,     // timeout in us
-     *     ackCheck: bool = true ,      // enable ACK check
+     * 将设备配置添加到总线，用于后续的读写操作。
+     * 如果设备已存在，则更新其配置信息。
+     * 
+     * options 参数说明：
+     * ```js
+     * {
+     *     addr: number,               // 设备地址（必需）
+     *     addrBit10: bool = false,    // 是否使用 10 位地址（默认 7 位）
+     *     regAddrBits: number = 8,    // 寄存器地址位数（8/16/32，默认 8）
+     *     regBits: number = 8,        // 寄存器值位数（8/16/32，默认与 regAddrBits 相同）
+     *     freq: number = 100000,      // 时钟频率（Hz，默认 100kHz）
+     *     timeout: number = 1000,     // 超时时间（微秒，默认 1000）
+     *     ackCheck: bool = true       // 是否启用 ACK 检查（默认启用）
      * }
+     * ```
      * 
      * @module serial
      * @class I2C
      * @function addDevice
-     * @param options: Object
+     * @param options:object 设备配置对象
      * @return undefined
+     * @throws I2C 未在主机模式下初始化
+     * @throws 缺少设备地址
+     * @throws 寄存器位数无效（必须是 8/16/32）
+     * @throws 添加设备失败
      */
     JSValue I2C::addDevice(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(I2C, that)
@@ -346,14 +418,19 @@ namespace be {
     }
 
     /**
-     * 从总线移除一个设备
+     * 从 I2C 总线移除一个设备。
+     * 
+     * 删除指定地址的设备配置，释放相关资源。
      * 
      * @module serial
      * @class I2C
-     * @function addDevice
-     * @param address: number
-     * @param bit10:bool=false
+     * @function removeDevice
+     * @param address:number 设备地址
+     * @param bit10:bool=false 是否使用 10 位地址（默认 false，即 7 位地址）
      * @return undefined
+     * @throws I2C 未在主机模式下初始化
+     * @throws 设备不存在
+     * @throws 移除设备失败
      */
     JSValue I2C::removeDevice(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(I2C, that)
@@ -382,6 +459,17 @@ namespace be {
         return JS_UNDEFINED ;
     }
 
+    /**
+     * 关闭并释放 I2C 总线资源。
+     * 
+     * 移除所有已添加的设备，删除总线句柄，释放相关资源。
+     * 调用后 I2C 总线恢复为未初始化状态。
+     * 
+     * @module serial
+     * @class I2C
+     * @function unsetup
+     * @return bool 成功返回 true，失败返回 false
+     */
     JSValue I2C::unsetup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(I2C, that)
         #if SOC_I2C_SUPPORT_SLAVE
@@ -422,6 +510,14 @@ namespace be {
         that->mode = I2C_MODE_MASTER ;
         return res==ESP_OK? JS_TRUE: JS_FALSE ;
     }
+    /**
+     * 检查 I2C 总线是否已初始化。
+     * 
+     * @module serial
+     * @class I2C
+     * @function isInstalled
+     * @return bool 已初始化返回 true，否则返回 false
+     */
     JSValue I2C::isInstalled(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(I2C, that)
         return that->isInstalled()? JS_TRUE: JS_FALSE ;
@@ -575,7 +671,19 @@ namespace be {
     }
 
 
-    // JS binding
+    /**
+     * 检测指定地址的设备是否存在。
+     * 
+     * 向指定 I2C 地址发送探测信号，检查设备是否响应。
+     * 
+     * @module serial
+     * @class I2C
+     * @function ping
+     * @param address:number 设备 I2C 地址（7 位或 10 位）
+     * @return bool 设备存在返回 true，否则返回 false
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     */
     JSValue I2C::ping(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(1)
         THIS_NCLASS(I2C, that)
@@ -583,6 +691,20 @@ namespace be {
         ARGV_TO_UINT16(0, addr)
         return that->ping(addr)? JS_TRUE: JS_FALSE ;
     }
+    /**
+     * 扫描 I2C 总线上的所有设备。
+     * 
+     * 在指定地址范围内扫描，打印发现的设备地址到控制台。
+     * 
+     * @module serial
+     * @class I2C
+     * @function scan
+     * @param from:number=1 起始扫描地址（默认 1）
+     * @param to:number=127 结束扫描地址（默认 127）
+     * @param timeout_ms:number=20 探测超时时间（毫秒，默认 20）
+     * @return undefined
+     * @throws I2C 未在主机模式下初始化
+     */
     JSValue I2C::scan(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         THIS_NCLASS(I2C, that)
         JSCHECK_MASTER
@@ -592,6 +714,21 @@ namespace be {
         that->scan(from,to, timeout_ms) ;
         return JS_UNDEFINED ;
     }
+    /**
+     * 向 I2C 设备发送数据。
+     * 
+     * 向指定地址的设备发送原始数据（不指定寄存器）。
+     * 
+     * @module serial
+     * @class I2C
+     * @function send
+     * @param address:number 目标设备地址
+     * @param data:uint8[] 要发送的数据字节数组
+     * @return bool 发送成功返回 true，失败返回 false
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 数据参数不是数组
+     */
     JSValue I2C::send(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(2)
         THIS_NCLASS(I2C, that)
@@ -623,16 +760,74 @@ namespace be {
         }                                       \
         return  that->write<type>(addr, reg, byte)? JS_TRUE: JS_FALSE ;
 
+    /**
+     * 向 I2C 设备寄存器写入 8 位数据。
+     * 
+     * @module serial
+     * @class I2C
+     * @function write8
+     * @param address:number 设备地址
+     * @param reg:number 寄存器地址
+     * @param value:number 要写入的 8 位值（0-255）
+     * @return bool 写入成功返回 true，失败返回 false
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 设备未添加
+     */
     JSValue I2C::write8(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         I2C_WRITE(uint8_t,ARGV_TO_UINT8)
     }
+    /**
+     * 向 I2C 设备寄存器写入 16 位数据。
+     * 
+     * @module serial
+     * @class I2C
+     * @function write16
+     * @param address:number 设备地址
+     * @param reg:number 寄存器地址
+     * @param value:number 要写入的 16 位值（0-65535）
+     * @return bool 写入成功返回 true，失败返回 false
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 设备未添加
+     */
     JSValue I2C::write16(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         I2C_WRITE(uint16_t,ARGV_TO_UINT16)
     }
+    /**
+     * 向 I2C 设备寄存器写入 32 位数据。
+     * 
+     * @module serial
+     * @class I2C
+     * @function write32
+     * @param address:number 设备地址
+     * @param reg:number 寄存器地址
+     * @param value:number 要写入的 32 位值
+     * @return bool 写入成功返回 true，失败返回 false
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 设备未添加
+     */
     JSValue I2C::write32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         I2C_WRITE(uint32_t,ARGV_TO_UINT32)
     }
 
+    /**
+     * 从 I2C 设备接收数据。
+     * 
+     * 从指定地址的设备读取指定长度的原始数据（不指定寄存器）。
+     * 
+     * @module serial
+     * @class I2C
+     * @function recv
+     * @param address:number 设备地址
+     * @param length:number 要接收的字节数
+     * @return ArrayBuffer|null 接收到的数据，失败返回 null
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 接收长度无效
+     * @throws 内存分配失败
+     */
     JSValue I2C::recv(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(2)
         ARGV_TO_UINT16(0, addr)
@@ -653,6 +848,20 @@ namespace be {
         return JS_NewArrayBuffer(ctx, buffer, len, freeArrayBuffer, NULL, false) ;
     }
 
+    /**
+     * 从 I2C 设备接收 1 个字节数据。
+     * 
+     * 从指定地址的设备读取单个字节数据。
+     * 
+     * @module serial
+     * @class I2C
+     * @function recvU8
+     * @param address:number 设备地址
+     * @return number 接收到的 8 位无符号数值（0-255）
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 接收失败
+     */
     JSValue I2C::recvU8(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(1)
         ARGV_TO_UINT16(0, addr)
@@ -665,21 +874,105 @@ namespace be {
         return JS_NewUint32(ctx,byte) ;
     }
 
+    /**
+     * 从 I2C 设备寄存器读取有符号 8 位数据。
+     * 
+     * @module serial
+     * @class I2C
+     * @function readI8
+     * @param address:number 设备地址
+     * @param reg:number 寄存器地址
+     * @return number 读取到的 8 位有符号数值（-128 到 127）
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 设备未添加
+     * @throws 读取失败
+     */
     JSValue I2C::readI8(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return readRegInt<int8_t>(ctx, this_val, argc, argv, true) ;
     }
+    /**
+     * 从 I2C 设备寄存器读取有符号 16 位数据。
+     * 
+     * @module serial
+     * @class I2C
+     * @function readI16
+     * @param address:number 设备地址
+     * @param reg:number 寄存器地址
+     * @return number 读取到的 16 位有符号数值（-32768 到 32767）
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 设备未添加
+     * @throws 读取失败
+     */
     JSValue I2C::readI16(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return readRegInt<int16_t>(ctx, this_val, argc, argv, true) ;
     }
+    /**
+     * 从 I2C 设备寄存器读取有符号 32 位数据。
+     * 
+     * @module serial
+     * @class I2C
+     * @function readI32
+     * @param address:number 设备地址
+     * @param reg:number 寄存器地址
+     * @return number 读取到的 32 位有符号数值
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 设备未添加
+     * @throws 读取失败
+     */
     JSValue I2C::readI32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return readRegInt<int32_t>(ctx, this_val, argc, argv, true) ;
     }
+    /**
+     * 从 I2C 设备寄存器读取无符号 8 位数据。
+     * 
+     * @module serial
+     * @class I2C
+     * @function readU8
+     * @param address:number 设备地址
+     * @param reg:number 寄存器地址
+     * @return number 读取到的 8 位无符号数值（0-255）
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 设备未添加
+     * @throws 读取失败
+     */
     JSValue I2C::readU8(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return readRegInt<uint8_t>(ctx, this_val, argc, argv, true) ;
     }
+    /**
+     * 从 I2C 设备寄存器读取无符号 16 位数据。
+     * 
+     * @module serial
+     * @class I2C
+     * @function readU16
+     * @param address:number 设备地址
+     * @param reg:number 寄存器地址
+     * @return number 读取到的 16 位无符号数值（0-65535）
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 设备未添加
+     * @throws 读取失败
+     */
     JSValue I2C::readU16(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return readRegInt<uint16_t>(ctx, this_val, argc, argv, true) ;
     }
+    /**
+     * 从 I2C 设备寄存器读取无符号 32 位数据。
+     * 
+     * @module serial
+     * @class I2C
+     * @function readU32
+     * @param address:number 设备地址
+     * @param reg:number 寄存器地址
+     * @return number 读取到的 32 位无符号数值
+     * @throws 参数数量不足
+     * @throws I2C 未在主机模式下初始化
+     * @throws 设备未添加
+     * @throws 读取失败
+     */
     JSValue I2C::readU32(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return readRegInt<uint32_t>(ctx, this_val, argc, argv, true) ;
     }

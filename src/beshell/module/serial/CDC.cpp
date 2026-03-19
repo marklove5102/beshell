@@ -9,6 +9,46 @@
 
 namespace be {
 
+    /**
+     * CDC (USB Serial JTAG) 类
+     * 
+     * 用于通过 USB Serial JTAG 接口进行通信。CDC 是 ESP32 芯片内置的 USB 串口功能，
+     * 无需额外的 USB 转串口芯片，直接通过 USB 线连接电脑即可进行通信。
+     * 
+     * **注意**：CDC 是一个独立的模块，不是通过 serial 模块访问的。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as cdc from "cdc"
+     * 
+     * // 初始化 CDC
+     * cdc.setup()
+     * 
+     * // 或者指定缓冲区大小
+     * cdc.setup(256, 256)  // rx_buffer_size, tx_buffer_size
+     * 
+     * // 监听接收数据
+     * cdc.on("data", (data) => {
+     *     console.log("Received:", data)
+     *     // 将 ArrayBuffer 转换为字符串
+     *     const text = new TextDecoder().decode(data)
+     *     console.log("Text:", text)
+     * })
+     * 
+     * // 发送数据
+     * cdc.write("Hello CDC!")
+     * 
+     * // 发送二进制数据
+     * const buffer = new Uint8Array([0x01, 0x02, 0x03]).buffer
+     * cdc.write(buffer)
+     * ```
+     * 
+     * @module serial
+     * @class CDC
+     * @event data 当接收到数据时触发
+     * @param data:ArrayBuffer 接收到的数据
+     */
+
     char const * const CDC::name = "cdc" ;
     bool CDC::setuped = false ;
 
@@ -63,6 +103,31 @@ namespace be {
         emitSyncFree("data", {JS_NewArrayBuffer(ctx, ((cdc_event_t*)param)->buf, ((cdc_event_t*)param)->len, freeArrayBuffer, NULL, false)}) ;
     }
 
+    /**
+     * 初始化并配置 USB Serial JTAG CDC 驱动
+     * 
+     * 初始化 CDC 驱动，配置接收和发送缓冲区大小。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as cdc from "cdc"
+     * 
+     * // 使用默认缓冲区大小（256字节）
+     * cdc.setup()
+     * 
+     * // 指定缓冲区大小
+     * cdc.setup(512, 512)  // 接收缓冲区 512 字节，发送缓冲区 512 字节
+     * ```
+     *
+     * @module serial
+     * @class CDC
+     * @function setup
+     * @param rx_buffer_size:number=256 接收缓冲区大小（可选，默认 256）
+     * @param tx_buffer_size:number=256 发送缓冲区大小（可选，默认 256）
+     * @return undefined
+     * @throws CDC 已初始化
+     * @throws 驱动安装失败
+     */
     JSValue CDC::setup(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
         if(setuped) {
@@ -108,6 +173,35 @@ namespace be {
         return JS_UNDEFINED;
     }
     
+    /**
+     * 向 USB Serial JTAG 写入数据
+     * 
+     * 发送字符串或二进制数据到 USB Serial JTAG 接口。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as cdc from "cdc"
+     * 
+     * // 发送字符串
+     * cdc.write("Hello World!")
+     * 
+     * // 发送二进制数据
+     * const buffer = new Uint8Array([0x01, 0x02, 0x03, 0x04]).buffer
+     * cdc.write(buffer)
+     * 
+     * // 检查实际写入的字节数
+     * const bytesWritten = cdc.write("Test data")
+     * console.log("Bytes written:", bytesWritten)
+     * ```
+     *
+     * @module serial
+     * @class CDC
+     * @function write
+     * @param data:string|ArrayBuffer 要写入的数据
+     * @return number 实际写入的字节数
+     * @throws 参数类型无效
+     * @throws 写入失败
+     */
     JSValue CDC::write(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         if (argc < 1) {
             return JS_ThrowTypeError(ctx, "Missing argument: data (string or ArrayBuffer)");

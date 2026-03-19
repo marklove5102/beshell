@@ -211,22 +211,272 @@ namespace be {
     }
 
     // js api
+
+    /**
+     * 从 NVS 读取有符号 8 位整数值
+     * 
+     * 从默认命名空间 "beshell" 中读取指定 key 的 int8 值
+     * 
+     * @module nvs
+     * @function readInt8
+     * @param key:string 要读取的键名
+     * @return number|null 读取到的整数值（-128 ~ 127），不存在时返回 null
+     */
     NVS_INT_JS_GETTER(Int8, int8_t, Int32)
+
+    /**
+     * 从 NVS 读取有符号 16 位整数值
+     * 
+     * 从默认命名空间 "beshell" 中读取指定 key 的 int16 值
+     * 
+     * @module nvs
+     * @function readInt16
+     * @param key:string 要读取的键名
+     * @return number|null 读取到的整数值（-32768 ~ 32767），不存在时返回 null
+     */
     NVS_INT_JS_GETTER(Int16, int16_t, Int32)
+
+    /**
+     * 从 NVS 读取有符号 32 位整数值
+     * 
+     * 从默认命名空间 "beshell" 中读取指定 key 的 int32 值。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as nvs from "nvs"
+     * 
+     * // 写入整数
+     * nvs.writeInt32("counter", 42)
+     * 
+     * // 读取整数
+     * const count = nvs.readInt32("counter")
+     * console.log("Count:", count)  // 42
+     * 
+     * // 读取不存在的键返回 null
+     * const notExist = nvs.readInt32("nonexistent")
+     * console.log(notExist)  // null
+     * 
+     * // 用于存储时间戳
+     * nvs.writeInt32("lastBoot", Date.now())
+     * const lastBoot = nvs.readInt32("lastBoot")
+     * console.log("Last boot:", new Date(lastBoot))
+     * ```
+     *
+     * @module nvs
+     * @function readInt32
+     * @param key:string 要读取的键名
+     * @return number|null 读取到的整数值，不存在时返回 null
+     */
     NVS_INT_JS_GETTER(Int32, int32_t, Int32)
+
+    /**
+     * 从 NVS 读取有符号 64 位整数值
+     * 
+     * 从默认命名空间 "beshell" 中读取指定 key 的 int64 值
+     * 
+     * @module nvs
+     * @function readInt64
+     * @param key:string 要读取的键名
+     * @return number|null 读取到的整数值，不存在时返回 null
+     */
     NVS_INT_JS_GETTER(Int64, int64_t, Int64)
+
+    /**
+     * 从 NVS 读取无符号 8 位整数值
+     * 
+     * 从默认命名空间 "beshell" 中读取指定 key 的 uint8 值。
+     * 适合存储小范围数值（0-255），如状态标志、模式选择等。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as nvs from "nvs"
+     * 
+     * // 存储设备模式（0=正常, 1=省电, 2=性能）
+     * nvs.writeUint8("deviceMode", 1)
+     * 
+     * // 读取设备模式
+     * const mode = nvs.readUint8("deviceMode")
+     * console.log("Device mode:", mode)
+     * 
+     * // 存储布尔值（0=false, 1=true）
+     * nvs.writeUint8("firstBoot", 0)
+     * const isFirstBoot = nvs.readUint8("firstBoot") !== 0
+     * console.log("First boot:", isFirstBoot)
+     * ```
+     *
+     * @module nvs
+     * @function readUint8
+     * @param key:string 要读取的键名
+     * @return number|null 读取到的整数值（0 ~ 255），不存在时返回 null
+     */
     NVS_INT_JS_GETTER(Uint8, uint8_t, Uint32)
+
+    /**
+     * 从 NVS 读取无符号 16 位整数值
+     * 
+     * 从默认命名空间 "beshell" 中读取指定 key 的 uint16 值
+     * 
+     * @module nvs
+     * @function readUint16
+     * @param key:string 要读取的键名
+     * @return number|null 读取到的整数值（0 ~ 65535），不存在时返回 null
+     */
     NVS_INT_JS_GETTER(Uint16, uint16_t, Uint32)
+
+    /**
+     * 从 NVS 读取无符号 32 位整数值
+     * 
+     * 从默认命名空间 "beshell" 中读取指定 key 的 uint32 值
+     * 
+     * @module nvs
+     * @function readUint32
+     * @param key:string 要读取的键名
+     * @return number|null 读取到的整数值，不存在时返回 null
+     */
     NVS_INT_JS_GETTER(Uint32, uint32_t, Uint32)
 
+    /**
+     * 向 NVS 写入有符号 8 位整数值
+     * 
+     * 将 int8 值写入默认命名空间 "beshell" 中指定的 key
+     * 
+     * @module nvs
+     * @function writeInt8
+     * @param key:string 要写入的键名
+     * @param value:number 要写入的整数值（-128 ~ 127）
+     * @return bool 写入成功返回 true，失败返回 false
+     * @throws value 不是数字
+     */
     NVS_INT_JS_SETTER(Int8, int8_t, Int32, int32_t)
+
+    /**
+     * 向 NVS 写入有符号 16 位整数值
+     * 
+     * 将 int16 值写入默认命名空间 "beshell" 中指定的 key
+     * 
+     * @module nvs
+     * @function writeInt16
+     * @param key:string 要写入的键名
+     * @param value:number 要写入的整数值（-32768 ~ 32767）
+     * @return bool 写入成功返回 true，失败返回 false
+     * @throws value 不是数字
+     */
     NVS_INT_JS_SETTER(Int16, int16_t, Int32, int32_t)
+
+    /**
+     * 向 NVS 写入有符号 32 位整数值
+     * 
+     * 将 int32 值写入默认命名空间 "beshell" 中指定的 key。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as nvs from "nvs"
+     * 
+     * // 写入计数器
+     * nvs.writeInt32("bootCount", 1)
+     * 
+     * // 读取并递增
+     * let count = nvs.readInt32("bootCount") || 0
+     * count++
+     * nvs.writeInt32("bootCount", count)
+     * console.log("Boot count:", count)
+     * 
+     * // 写入时间戳
+     * nvs.writeInt32("lastUpdate", Date.now())
+     * 
+     * // 写入负数
+     * nvs.writeInt32("temperature", -5)
+     * console.log("Temperature:", nvs.readInt32("temperature"))
+     * ```
+     *
+     * @module nvs
+     * @function writeInt32
+     * @param key:string 要写入的键名
+     * @param value:number 要写入的整数值
+     * @return bool 写入成功返回 true，失败返回 false
+     * @throws value 不是数字
+     */
     NVS_INT_JS_SETTER(Int32, int32_t, Int32, int32_t)
+
+    /**
+     * 向 NVS 写入有符号 64 位整数值
+     * 
+     * 将 int64 值写入默认命名空间 "beshell" 中指定的 key
+     * 
+     * @module nvs
+     * @function writeInt64
+     * @param key:string 要写入的键名
+     * @param value:number 要写入的整数值
+     * @return bool 写入成功返回 true，失败返回 false
+     * @throws value 不是数字
+     */
     NVS_INT_JS_SETTER(Int64, int64_t, Int64, int64_t)
+
+    /**
+     * 向 NVS 写入无符号 8 位整数值
+     * 
+     * 将 uint8 值写入默认命名空间 "beshell" 中指定的 key
+     * 
+     * @module nvs
+     * @function writeUint8
+     * @param key:string 要写入的键名
+     * @param value:number 要写入的整数值（0 ~ 255）
+     * @return bool 写入成功返回 true，失败返回 false
+     * @throws value 不是数字
+     */
     NVS_INT_JS_SETTER(Uint8, uint8_t, Uint32, uint32_t)
+
+    /**
+     * 向 NVS 写入无符号 16 位整数值
+     * 
+     * 将 uint16 值写入默认命名空间 "beshell" 中指定的 key
+     * 
+     * @module nvs
+     * @function writeUint16
+     * @param key:string 要写入的键名
+     * @param value:number 要写入的整数值（0 ~ 65535）
+     * @return bool 写入成功返回 true，失败返回 false
+     * @throws value 不是数字
+     */
     NVS_INT_JS_SETTER(Uint16, uint16_t, Uint32, uint32_t)
+
+    /**
+     * 向 NVS 写入无符号 32 位整数值
+     * 
+     * 将 uint32 值写入默认命名空间 "beshell" 中指定的 key
+     * 
+     * @module nvs
+     * @function writeUint32
+     * @param key:string 要写入的键名
+     * @param value:number 要写入的整数值
+     * @return bool 写入成功返回 true，失败返回 false
+     * @throws value 不是数字
+     */
     NVS_INT_JS_SETTER(Uint32, uint32_t, Uint32, uint32_t)
 
+    /**
+     * 删除 NVS 中指定的键值对
+     * 
+     * 从默认命名空间 "beshell" 中删除指定 key 的数据。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as nvs from "nvs"
+     * 
+     * // 删除一个键
+     * const deleted = nvs.erase("myKey")
+     * console.log("Deleted:", deleted)
+     * 
+     * // 删除后再读取会返回 null
+     * const value = nvs.readString("myKey")
+     * console.log(value)  // null
+     * ```
+     *
+     * @module nvs
+     * @function erase
+     * @param key:string 要删除的键名
+     * @return bool 删除成功返回 true，失败返回 false
+     */
     JSValue NVS::erase(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(1)
 
@@ -251,6 +501,45 @@ namespace be {
 
     }
 
+    /**
+     * 从 NVS 读取字符串值
+     * 
+     * 从默认命名空间 "beshell" 中读取指定 key 的字符串值。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as nvs from "nvs"
+     * 
+     * // 写入字符串
+     * nvs.writeString("username", "admin")
+     * 
+     * // 读取字符串
+     * const username = nvs.readString("username")
+     * console.log("Username:", username)
+     * 
+     * // 读取不存在的键返回 null
+     * const notExist = nvs.readString("nonexistent")
+     * console.log(notExist)  // null
+     * 
+     * // 存储 JSON 数据
+     * const config = { wifi: { ssid: "MyWiFi", password: "secret" } }
+     * nvs.writeString("config", JSON.stringify(config))
+     * 
+     * // 读取并解析 JSON
+     * const saved = nvs.readString("config")
+     * const parsed = JSON.parse(saved)
+     * console.log(parsed.wifi.ssid)
+     * ```
+     *
+     * @module nvs
+     * @function readString
+     * @param key:string 要读取的键名
+     * @param buff_size:number=128 缓冲区大小
+     * @return string|null 读取到的字符串值，不存在时返回 null
+     * @throws buff_size 必须大于 0
+     * @throws NVS 打开失败
+     * @throws 内存分配失败
+     */
     JSValue NVS::readString(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(1)
         string ARGV_TO_STRING(0,key)
@@ -298,6 +587,33 @@ namespace be {
         return strvalue ;
     }
 
+    /**
+     * 向 NVS 写入字符串值
+     * 
+     * 将字符串值写入默认命名空间 "beshell" 中指定的 key。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as nvs from "nvs"
+     * 
+     * // 写入简单字符串
+     * nvs.writeString("deviceName", "ESP32-C3")
+     * 
+     * // 写入 JSON 字符串
+     * const config = { brightness: 80, volume: 50 }
+     * nvs.writeString("settings", JSON.stringify(config))
+     * 
+     * // 写入后再读取
+     * const name = nvs.readString("deviceName")
+     * console.log("Device:", name)
+     * ```
+     *
+     * @module nvs
+     * @function writeString
+     * @param key:string 要写入的键名
+     * @param value:string 要写入的字符串值
+     * @return bool 写入成功返回 true，失败返回 false
+     */
     JSValue NVS::writeString(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ASSERT_ARGC(2)
         string ARGV_TO_STRING(0,key)

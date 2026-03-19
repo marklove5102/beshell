@@ -1,48 +1,163 @@
 /**
+ * Serial 串口模块
  * 
- * 串口外设类：
+ * 提供对 ESP32 硬件串口外设的访问，包括 UART、I2C、SPI 等。
+ * 这些类不需要实例化，serial 模块会根据芯片的型号，自动初始化并导出可用的串口对象。
  * 
- * * [UART](UART.md)
+ * ## 使用方式
  * 
- * * [I2C](I2C.md)
+ * ```javascript
+ * import * as serial from "serial"
  * 
- * * [SPI](SPI.md)
+ * // 访问 UART2
+ * serial.uart2.setup({ tx: 17, rx: 16, baudrate: 115200 })
  * 
- * 这些类不需要实例化，serial 模块会根据芯片的类型，自动初始化并导出串口类对象。
+ * // 访问 I2C0
+ * serial.i2c0.setup({ sda: 21, scl: 22 })
  * 
- * 不同型号的 ESP32 芯片，所提供的硬件串口外设数量不一样。
+ * // 访问 SPI2
+ * serial.spi2.setup({ mosi: 23, miso: 19, sck: 18 })
+ * ```
  * 
- * |           | UART | I2C | SPI | I2S |
- * | -----     | ----- | ----- | ----- | ----- | 
- * |  ESP32    |  3 |  2 |  3 |  2 |
- * |  ESP32 S2 |  2 |  2 |  3 |  1 |
- * |  ESP32 S3 |  3 |  2 |  3 |  2 |
- * |  ESP32 C2 |  2 |  1 |  2 |  1 |
- * |  ESP32 C3 |  2 |  1 |  2 |  1 |
- * |  ESP32 C6 |  3 |  1 |  2 |  1 |
- * |  ESP32 H2 |  2 |  2 |  2 |  1 |
- * |  ESP32 P4 |  6 |  2 |  3 |  3 |
+ * ## 硬件资源差异
  * 
- * 例如对于 `ESP32 S3`，serial 模块会导出：
+ * **重要**：不同型号的 ESP32 芯片，所提供的硬件串口外设数量不一样。
+ * serial 模块只会导出当前芯片实际拥有的外设对象。
  * 
- * ```typescript
+ * | 芯片型号 | UART | I2C | SPI | 说明 |
+ * |---------|------|-----|-----|------|
+ * | ESP32   | 3 (uart0-2) | 2 (i2c0-1) | 2 (spi1-2) | 经典款，资源最丰富 |
+ * | ESP32-S2| 2 (uart0-1) | 2 (i2c0-1) | 2 (spi1-2) | 无 uart2 |
+ * | ESP32-S3| 3 (uart0-2) | 2 (i2c0-1) | 2 (spi1-2) | 与 ESP32 相同 |
+ * | ESP32-C2| 2 (uart0-1) | 1 (i2c0)   | 2 (spi1-2) | 精简版，只有 1 个 I2C |
+ * | ESP32-C3| 2 (uart0-1) | 1 (i2c0)   | 2 (spi1-2) | 与 C2 相同 |
+ * | ESP32-C6| 3 (uart0-2) | 1 (i2c0)   | 2 (spi1-2) | 新增 LP UART |
+ * | ESP32-H2| 2 (uart0-1) | 2 (i2c0-1) | 2 (spi1-2) | 低功耗蓝牙芯片 |
+ * | ESP32-P4| 6 (uart0-5) | 2 (i2c0-1) | 3 (spi1-3) | 高性能，资源最丰富 |
+ * 
+ * > **注意**：`spi0` 用于内部 Flash/PSRAM，不对外导出。
+ * > SPI 导出的对象是 `spi1`, `spi2`（部分型号有 `spi3`）。
+ * 
+ * ## 各芯片导出对象一览
+ * 
+ * ### ESP32 / ESP32-S3
+ * ```javascript
  * {
- *     uart0: UART,
- *     uart1: UART,
- *     uart2: UART,
- * 
- *     i2c0: I2C,
- *     i2c1: I2C,
- * 
- *     spi0: SPI,
- *     spi1: SPI,
- *     spi2: SPI,
+ *     uart0, uart1, uart2,    // 3 个 UART
+ *     i2c0, i2c1,             // 2 个 I2C
+ *     spi1, spi2              // 2 个 SPI（spi0 内部使用）
  * }
  * ```
  * 
- * > 注意：`spi0` 用于内部 flash / psram , 所以没有导出。
+ * ### ESP32-S2 / ESP32-C2 / ESP32-C3
+ * ```javascript
+ * {
+ *     uart0, uart1,           // 2 个 UART（无 uart2）
+ *     i2c0,                   // 1 个 I2C（C2/C3 只有 i2c0）
+ *     spi1, spi2              // 2 个 SPI
+ * }
+ * ```
  * 
+ * ### ESP32-C6
+ * ```javascript
+ * {
+ *     uart0, uart1, uart2,    // 3 个 UART
+ *     i2c0,                   // 1 个 I2C
+ *     spi1, spi2,             // 2 个 SPI
+ *     // 另有 uartlp0（低功耗 UART）
+ * }
+ * ```
  * 
+ * ### ESP32-H2
+ * ```javascript
+ * {
+ *     uart0, uart1,           // 2 个 UART
+ *     i2c0, i2c1,             // 2 个 I2C
+ *     spi1, spi2              // 2 个 SPI
+ * }
+ * ```
+ * 
+ * ### ESP32-P4
+ * ```javascript
+ * {
+ *     uart0, uart1, uart2, uart3, uart4,  // 5 个 HP UART
+ *     i2c0, i2c1,                         // 2 个 I2C
+ *     spi1, spi2, spi3,                   // 3 个 SPI
+ *     // 另有 uartlp0（低功耗 UART）
+ * }
+ * ```
+ * 
+ * ## 对象说明
+ * 
+ * ### UART 对象
+ * - [uart0](UART.html) - UART0，通常用于调试输出和程序下载
+ * - [uart1](UART.html) - UART1，用户可自由使用
+ * - [uart2](UART.html) - UART2，用户可自由使用（部分型号没有）
+ * - uartlp0 - 低功耗 UART（仅部分型号支持）
+ * 
+ * ### I2C 对象
+ * - [i2c0](I2C.html) - I2C0，主/从模式支持
+ * - [i2c1](I2C.html) - I2C1，主/从模式支持（部分型号没有）
+ * 
+ * ### SPI 对象
+ * - [spi1](SPI.html) - SPI1，通常对应 SPI2_HOST
+ * - [spi2](SPI.html) - SPI2，通常对应 SPI3_HOST
+ * - spi3 - SPI3，仅 ESP32-P4 支持
+ * 
+ * ## 使用建议
+ * 
+ * 1. **UART0**：保留给调试和程序下载使用，应用程序建议使用 uart1/uart2
+ * 2. **SPI**：使用前需要先调用 `setup()` 初始化总线，再配置外设（如 W5500、SD 卡）
+ * 3. **I2C**：多个设备可以共享同一个 I2C 总线，通过设备地址区分
+ * 
+ * ## 示例代码
+ * 
+ * ```javascript
+ * import * as serial from "serial"
+ * import { W5500 } from "eth"
+ * 
+ * // 检查可用的串口对象
+ * console.log("Available UARTs:", Object.keys(serial).filter(k => k.startsWith("uart")))
+ * console.log("Available I2Cs:", Object.keys(serial).filter(k => k.startsWith("i2c")))
+ * console.log("Available SPIs:", Object.keys(serial).filter(k => k.startsWith("spi")))
+ * 
+ * // 使用 UART2 连接 GPS 模块
+ * if (serial.uart2) {
+ *     serial.uart2.setup({
+ *         tx: 17,
+ *         rx: 16,
+ *         baudrate: 9600
+ *     })
+ *     serial.uart2.listen((data) => {
+ *         console.log("GPS data:", data)
+ *     })
+ * }
+ * 
+ * // 使用 I2C0 连接传感器
+ * if (serial.i2c0) {
+ *     serial.i2c0.setup({
+ *         sda: 21,
+ *         scl: 22,
+ *         freq: 400000
+ *     })
+ *     serial.i2c0.scan()  // 扫描设备
+ * }
+ * 
+ * // 使用 SPI2 连接 W5500 以太网模块
+ * if (serial.spi2) {
+ *     serial.spi2.setup({
+ *         mosi: 23,
+ *         miso: 19,
+ *         sck: 18
+ *     })
+ *     
+ *     const eth = new W5500()
+ *     eth.setup({
+ *         spi: 2,   // 对应 serial.spi2
+ *         cs: 5
+ *     })
+ * }
+ * ```
  * 
  * @module serial
  */

@@ -139,6 +139,22 @@ function top(detail=false) {
     /**
      * 重启系统
      * 
+     * 立即重启设备。注意：此操作会终止当前运行的所有程序！
+     * 
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
+     * 
+     * // 简单重启
+     * process.reboot()
+     * 
+     * // 延迟重启（给日志保存等操作留出时间）
+     * setTimeout(() => {
+     *     process.reboot()
+     * }, 1000)
+     * ```
+     *
+     * @module process
      * @function reboot
      * @return undefined
      */
@@ -150,12 +166,36 @@ function top(detail=false) {
     }
 
     /**
-     * 读硬件地址
+     * 读取硬件 MAC 地址
      * 
+     * 读取设备的 MAC 地址。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
+     * 
+     * // 读取 WiFi STA MAC 地址（默认）
+     * const mac = process.getMac()
+     * console.log("MAC:", mac)
+     * 
+     * // 读取 WiFi AP MAC 地址
+     * const apMac = process.getMac("wifi.ap")
+     * console.log("AP MAC:", apMac)
+     * 
+     * // 读取蓝牙 MAC 地址
+     * const btMac = process.getMac("bt")
+     * console.log("BT MAC:", btMac)
+     * 
+     * // 格式化为十六进制字符串
+     * const macStr = process.getMac("wifi", true)
+     * console.log("MAC string:", macStr)  // "aa:bb:cc:dd:ee:ff"
+     * ```
+     *
+     * @module process
      * @function getMac
      * @param phy:"wifi"|"wifi.ap"|"wifi.softap"|"ble"|"eth"|"base"|"efuse"|"efuse.factory"|"efuse.customer"|"efuse.ext"="wifi" 要读取的硬件类型
      * @param format:bool=false 返回格式，false返回ArrayBuffer，true返回十六进制字符串
-     * @return ArrayBuffer|string 硬件地址
+     * @return ArrayBuffer|string MAC 地址
      */
     JSValue Process::getMac(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         
@@ -218,7 +258,8 @@ function top(detail=false) {
     
     /**
      * 设置硬件地址
-     * 
+     *
+     * @module process
      * @function setMac
      * @param macAddr:string|ArrayBuffer|Uint8Array MAC地址，可以是字符串格式"xx:xx:xx:xx:xx:xx"、6字节的ArrayBuffer或6字节的Uint8Array
      * @return undefined
@@ -332,12 +373,14 @@ function top(detail=false) {
 
     /**
      * 从一次性写入区(只读区) efuse 读取数据
-     * 
+     *
      * ESP32 一共8个32位寄存器共自定义使用
-     * 
+     *
+     * @module process
      * @function readEFUSE
      * @param field:number 要读取的 efuse 块和位，范围 0-7
      * @return number 读取到的 efuse 数据 (32位整数)
+     * @throws field 必须在 0-7 范围内
      */
     JSValue Process::readEFUSE(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 
@@ -359,6 +402,8 @@ function top(detail=false) {
 
     /**
      * 内存使用情况
+     * 
+     * 返回系统内存使用情况的详细信息。
      * 
      * 返回对象的格式：
      * 
@@ -382,12 +427,37 @@ function top(detail=false) {
      * }
      * ```
      * 
-     * 其中，`total` 表示总内存大小，`used` 表示已用内存大小，`free` 表示剩余内存大小。
+     * 其中，`total` 表示总内存大小，`used` 表示已用内存大小，`free` 表示剩余内存大小。psram 表示伪静态内存，通常是外挂的IC存储器。
      * 
-     * psram 表示伪静态内存，通常是外挂的IC存储器；
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
      * 
+     * // 获取内存使用情况
+     * const mem = process.usage()
+     * console.log("Heap free:", mem.heap.free)
+     * console.log("Heap used:", mem.heap.used)
+     * console.log("Heap total:", mem.heap.total)
+     * 
+     * // 计算内存使用率
+     * const heapUsage = (mem.heap.used / mem.heap.total * 100).toFixed(2)
+     * console.log("Heap usage:", heapUsage + "%")
+     * 
+     * // 检查 PSRAM（如果可用）
+     * if (mem.psram.total > 0) {
+     *     console.log("PSRAM free:", mem.psram.free)
+     * }
+     * 
+     * // 监控内存泄漏
+     * setInterval(() => {
+     *     const u = process.usage()
+     *     console.log("Heap used:", u.heap.used)
+     * }, 10000)
+     * ```
+     *
+     * @module process
      * @function usage
-     * @return object 
+     * @return object 内存使用情况对象
      */
     JSValue Process::usage(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         (void) argc ;
@@ -446,8 +516,31 @@ function top(detail=false) {
     }
     
     /**
-     * 延时函数
+     * 同步延时函数
      * 
+     * 这是一个同步函数，不需要 `await` 或 `Promise.then()`
+     * 
+     * 阻塞当前任务指定的毫秒数。注意：这会阻塞 JavaScript 执行！
+     * 
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
+     * 
+     * // 延时 1 秒
+     * console.log("Start")
+     * process.sleep(1000)
+     * console.log("After 1 second")
+     * 
+     * // 用于简单的轮询
+     * while (!checkCondition()) {
+     *     process.sleep(100)  // 每 100ms 检查一次
+     * }
+     * 
+     * // 注意：非阻塞延时请使用 setTimeout
+     * setTimeout(() => console.log("Non-blocking delay"), 1000)
+     * ```
+     *
+     * @module process
      * @function sleep
      * @param ms:number 延时时间，单位为毫秒
      * @return undefined
@@ -462,6 +555,21 @@ function top(detail=false) {
     /**
      * 设置系统时间
      * 
+     * 设置设备的系统时间（UNIX 时间戳）。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
+     * 
+     * // 设置当前时间
+     * const now = Date.now()
+     * process.setTime(now)
+     * 
+     * // 从 NTP 服务器同步时间（如果有网络）
+     * // 注意：实际 NTP 同步需要额外的网络代码
+     * ```
+     *
+     * @module process
      * @function setTime
      * @param ms:number UNIX时间戳，单位为毫秒
      * @return undefined
@@ -474,12 +582,29 @@ function top(detail=false) {
     }
 
     /**
-     * 设置系统时区时间偏置量(分钟)
+     * 设置系统时区时间偏置（分钟）
      * 
+     * 设置设备的时区偏移量。
+     * 
+     * 示例：
      * ```javascript
-     * process.setTimezoneOffset(8*60); // 设置时区为东八区
-     * ```
+     * import * as process from "process"
      * 
+     * // 设置时区为东八区（北京时间）
+     * process.setTimezoneOffset(8 * 60)
+     * 
+     * // 设置时区为 UTC（格林威治时间）
+     * process.setTimezoneOffset(0)
+     * 
+     * // 设置时区为西五区（纽约时间）
+     * process.setTimezoneOffset(-5 * 60)
+     * 
+     * // 获取当前时区偏移
+     * const offset = new Date().getTimezoneOffset()
+     * console.log("Timezone offset:", offset, "minutes")
+     * ```
+     *
+     * @module process
      * @function setTimezoneOffset
      * @param minute:number 时间偏置分钟
      * @return undefined
@@ -493,12 +618,42 @@ function top(detail=false) {
         return JS_UNDEFINED ;
     }
 
+    /**
+     * 运行垃圾回收
+     * 
+     * 强制运行 JavaScript 垃圾回收器。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
+     * 
+     * // 手动触发垃圾回收
+     * console.log("Before GC:", process.usage().heap.used)
+     * process.gc()
+     * console.log("After GC:", process.usage().heap.used)
+     * 
+     * // 定期垃圾回收（谨慎使用）
+     * // setInterval(() => process.gc(), 60000)
+     * ```
+     *
+     * @module process
+     * @function gc
+     * @return undefined
+     */
     JSValue Process::gc(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
         JS_RunGC(JS_GetRuntime(ctx)) ;
         return JS_UNDEFINED ;
     }
 
     static JSValue watchingVar = JS_NULL ;
+    /**
+     * 获取对象引用计数
+     *
+     * @module process
+     * @function ref
+     * @param obj:object 要检查的对象（可选）
+     * @return number 引用计数
+     */
     JSValue Process::ref(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         if(argc>0) {
             if( !JS_IsObject(argv[0]) ) {
@@ -518,8 +673,28 @@ function top(detail=false) {
     /**
      * 获取系统运行时间（毫秒）
      * 
+     * 返回设备从上电开始的运行时间。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
+     * 
+     * // 获取运行时间
+     * const uptime = process.getRunningTime()
+     * console.log("Uptime:", uptime, "ms")
+     * console.log("Uptime:", (uptime / 1000).toFixed(2), "seconds")
+     * console.log("Uptime:", (uptime / 60000).toFixed(2), "minutes")
+     * 
+     * // 计算操作耗时
+     * const start = process.getRunningTime()
+     * doSomething()
+     * const elapsed = process.getRunningTime() - start
+     * console.log("Elapsed:", elapsed, "ms")
+     * ```
+     *
+     * @module process
      * @function getRunningTime
-     * @return number
+     * @return number 系统运行时间（毫秒）
      */
     JSValue Process::getRunningTime(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         int64_t boot_time_us = esp_timer_get_time();
@@ -527,10 +702,31 @@ function top(detail=false) {
     }
 
     /**
-     * 芯片温度
+     * 获取芯片温度
      * 
+     * 读取 ESP32 芯片的内部温度传感器。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
+     * 
+     * // 读取芯片温度
+     * const temp = process.getChipTemperature()
+     * console.log("Chip temperature:", temp, "°C")
+     * 
+     * // 温度监控
+     * setInterval(() => {
+     *     const t = process.getChipTemperature()
+     *     if (t > 80) {
+     *         console.warn("High temperature warning:", t, "°C")
+     *     }
+     * }, 30000)  // 每 30 秒检查一次
+     * ```
+     *
+     * @module process
      * @function getChipTemperature
-     * @return number
+     * @return number 摄氏度温度
+     * @throws 温度传感器不支持
      */
     JSValue Process::getChipTemperature(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 #if SOC_TEMP_SENSOR_SUPPORTED
@@ -576,8 +772,36 @@ function top(detail=false) {
     /**
      * 芯片复位原因
      * 
+     * 返回设备上次复位的原因。
+     * 
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
+     * 
+     * // 获取复位原因
+     * const reason = process.resetReason()
+     * console.log("Reset reason:", reason)
+     * 
+     * // 根据复位原因执行不同操作
+     * switch(reason) {
+     *     case "power-on":
+     *         console.log("Power on reset")
+     *         break
+     *     case "soft-reset":
+     *         console.log("Software reset")
+     *         break
+     *     case "watchdog":
+     *         console.warn("Watchdog timeout!")
+     *         break
+     *     case "panic":
+     *         console.error("System panic!")
+     *         break
+     * }
+     * ```
+     *
+     * @module process
      * @function resetReason
-     * @return string
+     * @return string 复位原因字符串
      */
     JSValue Process::resetReason(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         
@@ -645,12 +869,13 @@ function top(detail=false) {
     
     /**
      * 返回各个任务执行的情况
-     * 
+     *
      * > 需要配置 FreeRTOS 的以下选项：
      * > * CONFIG_FREERTOS_USE_TRACE_FACILITY
      * > * CONFIG_FREERTOS_USE_STATS_FORMATTING_FUNCTIONS
      * > * CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS
-     * 
+     *
+     * @module process
      * @function top
      * @return string
      */
@@ -689,10 +914,19 @@ function top(detail=false) {
         return JS_NewString(ctx, buff.c_str()) ;
     }
     /**
-     * 返回cpu数量
+     * 返回 CPU 数量
      * 
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
+     * 
+     * const cpus = process.cpuCount()
+     * console.log("CPU count:", cpus)
+     * ```
+     *
+     * @module process
      * @function cpuCount
-     * @return number
+     * @return number CPU 核心数
      */
     JSValue Process::cpuCount(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         return JS_NewInt32(ctx, configNUMBER_OF_CORES) ;
@@ -701,11 +935,28 @@ function top(detail=false) {
     /**
      * 返回各个任务执行的情况
      * 
+     * 示例：
+     * ```javascript
+     * import * as process from "process"
+     * 
+     * // 获取 CPU 0 上的任务
+     * const tasks = process.tasks(0)
+     * console.log("Tasks on CPU 0:", tasks)
+     * 
+     * // 获取 CPU 1 上的任务（双核芯片）
+     * if (process.cpuCount() > 1) {
+     *     const tasks1 = process.tasks(1)
+     *     console.log("Tasks on CPU 1:", tasks1)
+     * }
+     * ```
+     *
      * > 需要配置 FreeRTOS 的以下选项：
      * > * CONFIG_FREERTOS_USE_TRACE_FACILITY
-     * 
-     * @function top
-     * @return string
+     *
+     * @module process
+     * @function tasks
+     * @param core:number=0 CPU 核心编号
+     * @return string[] 任务名称列表
      */
     JSValue Process::tasks(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         ARGV_TO_UINT8_OPT(0, core, 0) ;

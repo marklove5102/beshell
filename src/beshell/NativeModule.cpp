@@ -101,7 +101,17 @@ namespace be {
             return ;
         }
         native_param = malloc(param_size) ;
+        if(!native_param) {
+            printf("enableNativeEvent failed: malloc native_param failed\n") ;
+            return ;
+        }
         nevent_queue = (void *)xQueueCreate(queue_size, param_size);
+        if(!nevent_queue) {
+            printf("enableNativeEvent failed: xQueueCreate failed\n") ;
+            free(native_param) ;
+            native_param = nullptr ;
+            return ;
+        }
         JSEngine::fromJSContext(ctx)->addLoopFunction((EngineLoopFunction)nativeEventLoop, this, true) ;
     }
 
@@ -122,6 +132,7 @@ namespace be {
     }
     
     void NativeModule::nativeEventLoop(JSContext * ctx, NativeModule * ee) {
+        // dp(ee)
         while(xQueueReceive((QueueHandle_t)ee->nevent_queue, ee->native_param, 0)==pdTRUE) {
             ee->onNativeEvent(ctx, ee->native_param) ;
         }

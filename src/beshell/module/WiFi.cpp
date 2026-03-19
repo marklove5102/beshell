@@ -410,14 +410,15 @@ namespace be {
     }
 
     /**
-     * 启动 WiFi 硬件，所有 wifi 模块里的 api 都需要在 `start()` 之后才能调用。
-     * 
-     * `startAP` 和 `connect` 会自动调用 `start()` ，因此一般情况下，可以直接使用 startAP 或 connect 。
-     * 
-     * 返回 0 表示成功, 返回非 0 表示错误代码
-     * 
+     * 启动 WiFi 硬件
+     *
+     * 所有 WiFi 模块里的 API 都需要在 `start()` 之后才能调用。
+     * `startAP` 和 `connect` 会自动调用 `start()`，因此一般情况下可以直接使用。
+     *
+     * @module wifi
      * @function start
-     * @return number
+     * @return number 返回 0 表示成功，非 0 表示错误代码
+     * @throws WiFi 初始化失败
      */
     JSValue WiFi::start(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         init() ;
@@ -427,12 +428,14 @@ namespace be {
     }
 
     /**
-     * 停止 WiFi 硬件。
-     * 
-     * 返回 0 表示成功, 返回非 0 表示错误代码
-     * 
+     * 停止 WiFi 硬件
+     *
+     * 返回 0 表示成功，非 0 表示错误代码
+     *
+     * @module wifi
      * @function stop
-     * @return number
+     * @return number 返回 0 表示成功，非 0 表示错误代码
+     * @throws WiFi 未初始化
      */
     JSValue WiFi::stop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -442,79 +445,104 @@ namespace be {
     }
     
     /**
-     * 返回是否已经 start()
-     * 
+     * 返回是否已经调用过 `start()` 启动 WiFi
+     *
+     * @module wifi
      * @function isReady
-     * @return bool
+     * @return bool 返回 true 表示 WiFi 已启动，false 表示未启动
      */
 
     /**
      * 启动 WiFi 热点
-     * 
+     *
      * > 该函数会自动调用 `start()` 启动 WiFi 模块。
-     * 
+     *
      * 异步返回 Promise\<bool\> 表示成功或者失败
-     * 
+     *
+     * 示例：
+     * ```javascript
+     * import { startAP } from "wifi"
+     *
+     * await startAP("MyAP", "password123")
+     * console.log("AP started!")
+     * ```
+     *
+     * @module wifi
      * @function startAP
      * @param ssid:string WiFi 热点名称
      * @param password:string WiFi 热点密码
-     * 
+     *
      * @return Promise\<bool\>
      */
 
     /**
      * 停止 WiFi 热点
-     * 
+     *
      * 异步返回 Promise\<bool\> 表示成功或者失败
-     * 
+     *
+     * @module wifi
      * @function stopAP
      * @return Promise\<bool\>
      */
 
     /**
      * 做为 WiFi STA 连接到热点
-     * 
+     *
      * > 该函数会自动调用 `start()` 启动 WiFi 模块。
-     * 
+     *
      * 异步返回 Promise\<bool\> 表示成功或者失败
-     * 
+     *
+     * 示例：
+     * ```javascript
+     * import { connect, waitIP } from "wifi"
+     *
+     * const connected = await connect("MyWiFi", "password123")
+     * if (connected) {
+     *     const ipInfo = await waitIP()
+     *     console.log("Connected! IP:", ipInfo.ip)
+     * }
+     * ```
+     *
+     * @module wifi
      * @function connect
      * @param ssid:string WiFi 热点名称
      * @param password:string WiFi 热点密码
      * @param retry:number=3 连接失败重试次数
      * @param retryDuration:number=2000 连接重试间隔时间，单位 ms
-     * 
+     *
      * @return Promise\<bool\>
      */
 
     /**
      * 断开 WiFi STA 的连接
-     * 
+     *
      * 异步返回 Promise\<bool\> 表示成功或者失败
-     * 
+     *
      * 未连接状态下，直接返回 Promise\<true\>
-     * 
+     *
+     * @module wifi
      * @function disconnect
      * @return Promise\<bool\>
      */
 
     /**
      * 返回是否正在连接中
-     * 
+     *
+     * @module wifi
      * @function isConnecting
-     * @return bool
+     * @return bool 返回 true 表示正在连接中，false 表示未连接
      */
 
 
     /**
      * 返回 AP/STA 详细状态
-     * 
+     *
      * 返回对象的格式：
-     * 
+     *
      * ::: code-tabs
      *
      * \@tab apsta
-     * 
+     *
      * ```javascript
      * {
      *     "ap": {
@@ -537,9 +565,9 @@ namespace be {
      *      } ,
      * }
      * ```
-     * 
+     *
      * \@tab ap
-     * 
+     *
      * ```javascript
      * "ap": {
      *     "ssid": string,
@@ -550,9 +578,9 @@ namespace be {
      *     "gw":string
      * } ,
      * ```
-     * 
+     *
      * \@tab sta
-     * 
+     *
      * ```javascript
      * "sta": {
      *     "ssid": string,
@@ -566,7 +594,17 @@ namespace be {
      * } ,
      * ```
      * :::
-     * 
+     *
+     * 示例：
+     * ```javascript
+     * import { status } from "wifi"
+     *
+     * const info = status("sta")
+     * console.log("Connected:", info.sta.connected)
+     * console.log("IP:", info.sta.ip)
+     * ```
+     *
+     * @module wifi
      * @function status
      * @param type:string="apsta" 可选值："apsta"、"ap"、"sta"
      * @return object
@@ -575,32 +613,61 @@ namespace be {
 
     /**
      * 等待从 DHCP 获取 IP 地址
-     * 
-     * 异步返回 Promise\<object|false\> ，如果失败范围 false，成功则返回包括 ip 的 sta status 对象。
-     * 
+     *
+     * 异步返回 Promise\<object|false\> ，如果失败返回 false，成功则返回包含 ip 的 sta status 对象。
+     *
      * 参考 `status()` 函数的返回值。
-     * 
+     *
+     * @module wifi
      * @function waitIP
      * @return Promise\<object|false\>
      */
 
+    /**
+     * 启动 STA 守护进程
+     *
+     * 当 WiFi 连接断开时，守护进程会自动尝试重新连接。
+     * 通常在 `connect()` 函数中设置 retry 为负数时会自动启动守护进程。
+     *
+     * @module wifi
+     * @function startStaDeamon
+     * @param dur:number=10000 检查间隔时间，单位毫秒，默认 10000ms
+     */
 
     /**
-     * 设置 wifi 的节能模式 (PowerSafe)
-     * 
-     * 参数 mode :
-     * 
-     * * 0 关闭节能模式
-     * * 1 最小
-     * * 2 最大
-     * 
-     * 关闭节能模式，可以避免 WiFi 休眠，提供通讯的效率和稳定性，但会增加功耗
-     * 
-     * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
-     * 
+     * 停止 STA 守护进程
+     *
+     * 停止自动重连功能。`disconnect()` 函数会自动调用此函数。
+     *
+     * @module wifi
+     * @function stopStaDeamon
+     */
+
+    /**
+     * 返回 STA 守护进程是否正在运行
+     *
+     * @module wifi
+     * @function isStaDeamonRunning
+     * @return boolean 返回 true 表示守护进程正在运行，false 表示未运行
+     */
+
+
+    /**
+     * 设置 WiFi 的节能模式 (Power Save)
+     *
+     * 参数 mode：
+     * - 0: 关闭节能模式
+     * - 1: 最小节能模式
+     * - 2: 最大节能模式
+     *
+     * 关闭节能模式可以避免 WiFi 休眠，提高通信的效率和稳定性，但会增加功耗。
+     *
+     * @module wifi
      * @function setPS
-     * @param mode:0|1|2
-     * @return number
+     * @param mode:number 节能模式，取值 0|1|2
+     * @return number 返回 0 表示成功，非 0 表示错误代码
+     * @throws WiFi 未初始化
+     * @throws 参数数量不足
      */
     JSValue WiFi::setPS(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -609,20 +676,21 @@ namespace be {
         return JS_NewInt32(ctx, esp_wifi_set_ps((wifi_ps_type_t)ps_mode)) ;
     }
     /**
-     * 设置 wifi 的工作模式，`startAP` 和 `connect` 会自动设置工作模式，因此通常不需要直接使用这个 api
-     * 
-     * 参数 mode :
-     * 
-     * * 0 未启动
-     * * 1 STA
-     * * 2 AP
-     * * 3 STA + AP
-     * 
-     * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
-     * 
+     * 设置 WiFi 的工作模式
+     *
+     * `startAP` 和 `connect` 会自动设置工作模式，因此通常不需要直接使用这个 API。
+     *
+     * 参数 mode：
+     * - 0: 未启动
+     * - 1: STA 模式
+     * - 2: AP 模式
+     * - 3: STA + AP 模式
+     *
+     * @module wifi
      * @function setMode
-     * @param mode:0|1|2|3
-     * @return number
+     * @param mode:number 工作模式，取值 0|1|2|3
+     * @return number 返回 0 表示成功，非 0 表示错误代码
+     * @throws WiFi 未初始化
      */
     JSValue WiFi::setMode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -631,15 +699,18 @@ namespace be {
     }
 
     /**
-     * 返回设置 wifi 的工作模式
-     * 
-     * * 0 未启动
-     * * 1 STA
-     * * 2 AP
-     * * 3 STA + AP
-     * 
+     * 返回 WiFi 的工作模式
+     *
+     * 返回值：
+     * - 0: 未启动
+     * - 1: STA 模式
+     * - 2: AP 模式
+     * - 3: STA + AP 模式
+     *
+     * @module wifi
      * @function getMode
-     * @return number
+     * @return number 当前工作模式
+     * @throws WiFi 未初始化
      */
     JSValue WiFi::mode(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -713,30 +784,34 @@ namespace be {
     // } wifi_auth_mode_t;
 
     /**
-     * 设置 wifi AP 模式的参数, `startAP` 会自动配置 AP 参数，需要对设备更详细的设置时，可以使用这个 api
-     * 
-     * 参数 mode :
+     * 设置 WiFi AP 模式的参数
+     *
+     * `startAP` 会自动配置 AP 参数，需要对设备更详细的设置时，可以使用这个 API。
+     *
+     * 参数 config：
      * ```javascript
      * {
-     *     ssid: string ,
-     *     password?: string ,
-     *     "threshold.authmode"?: 0-8 ,
-     *     channel?: 1-13 ,
-     *     max_connection?: number = 4 , // 最大客户连接数
-     *     ssid_hidden?:bool = false ,    // 热点不会被扫描到
-     *     beacon_interval?: number ,
-     *     pairwise_cipher?: number ,
-     *     ftm_responder?: bool ,        // Enable FTM Responder mode
+     *     ssid: string,              // 热点名称
+     *     password?: string,         // 热点密码
+     *     "threshold.authmode"?: number,  // 认证模式 0-8
+     *     channel?: number,          // 信道 1-13
+     *     max_connection?: number,   // 最大客户端连接数，默认 4
+     *     ssid_hidden?: boolean,     // 是否隐藏热点，默认 false
+     *     beacon_interval?: number,  // 信标间隔
+     *     pairwise_cipher?: number,  // 加密方式
+     *     ftm_responder?: boolean,   // 启用 FTM Responder 模式
      * }
      * ```
-     * 
-     * 如果 `password` 为空, 则 `threshold.authmode` 自动设置为 `WIFI_AUTH_OPEN`
-     * 
-     * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
-     * 
+     *
+     * 如果 `password` 为空，则 `threshold.authmode` 自动设置为 `WIFI_AUTH_OPEN`。
+     *
+     * @module wifi
      * @function setAPConfig
-     * @param config:object
-     * @return number
+     * @param config:object AP 配置对象
+     * @return number 返回 0 表示成功，非 0 表示错误代码
+     * @throws WiFi 未初始化
+     * @throws 参数数量不足
+     * @throws 参数类型错误
      */
     JSValue WiFi::setAPConfig(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -771,28 +846,32 @@ namespace be {
     }
     
     /**
-     * 设置 wifi STA 模式的连接参数, `connect` 会自动配置连接参数，需要使用更详细的连接参数时使用此 API
-     * 
-     * 参数 mode :
+     * 设置 WiFi STA 模式的连接参数
+     *
+     * `connect` 会自动配置连接参数，需要使用更详细的连接参数时使用此 API。
+     *
+     * 参数 config：
      * ```javascript
      * {
-     *     ssid: string ,
-     *     password?: string ,
-     *     "threshold.authmode"?: 0-8 ,
-     *     scan_method?: 0|1 ,
-     *     channel?: 1-13 ,
-     *     listen_interval?:number = 3 ,
-     *     sort_method?: 0|1 = 0 ,       // sort the connect AP in the list by rssi or security mode
+     *     ssid: string,              // 目标 AP 的 SSID
+     *     password?: string,         // 目标 AP 的密码
+     *     "threshold.authmode"?: number,  // 认证模式 0-8
+     *     scan_method?: number,      // 扫描方法 0|1
+     *     channel?: number,          // 目标信道 1-13
+     *     listen_interval?: number,  // 监听间隔，默认 3
+     *     sort_method?: number,      // 排序方法 0|1，默认 0
      * }
      * ```
-     * 
-     * 如果 `password` 为空, 则 `threshold.authmode` 自动设置为 `WIFI_AUTH_OPEN`
-     * 
-     * 返回 0 表示 api 调用成功, 返回非 0 表示错误代码
-     * 
+     *
+     * 如果 `password` 为空，则 `threshold.authmode` 自动设置为 `WIFI_AUTH_OPEN`。
+     *
+     * @module wifi
      * @function setStaConfig
-     * @param config:object
-     * @return number
+     * @param config:object STA 配置对象
+     * @return number 返回 0 表示成功，非 0 表示错误代码
+     * @throws WiFi 未初始化
+     * @throws 参数数量不足
+     * @throws 参数类型错误
      */
     JSValue WiFi::setStaConfig(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -824,13 +903,18 @@ namespace be {
     }
     
     /**
-     * 返回 wifi 的工作参数
-     * 
-     * 返回的对象可参考 `setStaConfig()` 和 `setAPConfig()` 的 `mode` 参数
-     * 
+     * 返回 WiFi 的工作参数
+     *
+     * 返回的对象可参考 `setStaConfig()` 和 `setAPConfig()` 的参数说明。
+     *
+     * @module wifi
      * @function getConfig
-     * @param mode:1|2  1代表 sta , 2代表 ap
-     * @return object
+     * @param mode:number 1 代表 STA，2 代表 AP
+     * @return object 配置对象
+     * @throws WiFi 未初始化
+     * @throws 参数数量不足
+     * @throws 获取配置失败
+     * @throws 未知的网络接口类型
      */
     JSValue WiFi::config(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -876,28 +960,48 @@ namespace be {
         return jsconf ;
     }
 
+    /**
+     * 启动 STA 模式的 DHCP 客户端
+     *
+     * 使用 `setStaIP()` 设置静态 IP 后，如需重新使用 DHCP，可调用此函数。
+     *
+     * @module wifi
+     * @function dhcpStaStart
+     * @return undefined
+     */
     JSValue WiFi::dhcpStaStart(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         esp_netif_dhcpc_start(netif_sta);
         return JS_UNDEFINED ;
     }
 
+    /**
+     * 停止 STA 模式的 DHCP 客户端
+     *
+     * 停止 DHCP 后，可以使用 `setStaIP()` 设置静态 IP 地址。
+     *
+     * @module wifi
+     * @function dhcpStaStop
+     * @return undefined
+     */
     JSValue WiFi::dhcpStaStop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         esp_netif_dhcpc_stop(netif_sta);
         return JS_UNDEFINED ;
     }
 
     /**
-     * 设置 WiFi STA 的 static IP 地址
-     * 
-     * 会先停止 DHCP 客户端，如果需要重新改为 DHCP，可使用 `dhcpStaStart()` 函数。
-     * 
-     * 成功返回 undefined , 否则抛出异常
-     * 
+     * 设置 WiFi STA 的静态 IP 地址
+     *
+     * 会先停止 DHCP 客户端，如果需要重新使用 DHCP，可调用 `dhcpStaStart()` 函数。
+     *
+     * @module wifi
      * @function setStaIP
      * @param ip:string IP 地址
      * @param netmask:string 子网掩码
      * @param gw:string 网关地址
      * @return undefined
+     * @throws WiFi 未初始化
+     * @throws 参数数量不足
+     * @throws 设置 IP 失败
      */
     JSValue WiFi::setStaIP(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -922,6 +1026,16 @@ namespace be {
         return JS_UNDEFINED ;
     }
     
+    /**
+     * 执行 WiFi STA 连接操作
+     *
+     * 这是底层连接函数，通常在 JS 层被 `connect()` 调用。
+     *
+     * @module wifi
+     * @function peripheralConnect
+     * @return number 返回 0 表示成功，非 0 表示错误代码
+     * @throws WiFi 未初始化
+     */
     JSValue WiFi::peripheralConnect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
         if(singleton){
@@ -975,10 +1089,13 @@ namespace be {
 
     /**
      * WiFi STA 断开连接
-     * 
-     * 返回 0 表示成功; 非 0 代表对应的错误
-     * 
-     * @return number
+     *
+     * 这是底层断开函数，通常在 JS 层被 `disconnect()` 调用。
+     *
+     * @module wifi
+     * @function peripheralDisconnect
+     * @return number 返回 0 表示成功，非 0 表示错误代码
+     * @throws WiFi 未初始化
      */
     JSValue WiFi::peripheralDisconnect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -986,20 +1103,24 @@ namespace be {
     }
 
     /**
-     * 返回 AP/STA 的 IP 
-     * 
-     * function 返回一个对象, 包含 ip, netmask, gw 信息
+     * 返回 AP/STA 的 IP 信息
+     *
+     * 返回一个对象，包含 ip、netmask、gw 信息。
      * ```javascript
      * {
-     *     ip:string,
-     *     netmask:string,
-     *     gw:string
+     *     ip: string,
+     *     netmask: string,
+     *     gw: string
      * }
      * ```
-     * 
+     *
+     * @module wifi
      * @function getIpInfo
-     * @param type:number 1代表 sta, 2代表 ap
-     * @return object
+     * @param type:number 1 代表 STA，2 代表 AP
+     * @return object IP 信息对象
+     * @throws WiFi 未初始化
+     * @throws 参数数量不足
+     * @throws 未知的网络接口类型
      */
     JSValue WiFi::getIpInfo(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -1037,11 +1158,14 @@ namespace be {
     }
 
     /**
-     * 返回设置 wifi 的在局域网中可被显示的主机名
-     * 
+     * 设置 WiFi 在局域网中显示的主机名
+     *
+     * @module wifi
      * @function setHostname
-     * @param nane:string
+     * @param name:string 主机名
      * @return undefined
+     * @throws WiFi 未初始化
+     * @throws 参数数量不足
      */
     JSValue WiFi::setHostname(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -1076,19 +1200,22 @@ namespace be {
     // } wifi_sta_list_t;
 
     /**
-     * 返回所有连接到本机AP的客户机
-     * 
-     * 返回对象数组, 每个对象包含 mac 和 rssi 信息
+     * 返回所有连接到本机 AP 的客户端
+     *
+     * 返回对象数组，每个对象包含 mac 和 rssi 信息。
      * ```javascript
      * [
-     *     {mac: "xx:xx", rssi: -30},
+     *     {mac: "xx:xx:xx:xx:xx:xx", rssi: -30},
      * ]
      * ```
-     * 
-     * `rssi` 值范围 -100 ~ 0, 单位为 dBm，表示信号强度，越大(绝对值越小)表示信号越强。
-     * 
+     *
+     * `rssi` 值范围 -100 ~ 0，单位为 dBm，表示信号强度，越大（绝对值越小）表示信号越强。
+     *
+     * @module wifi
      * @function allSta
-     * @return {mac:string,rssi:string}[]
+     * @return object[] 客户端列表，每个对象包含 mac 和 rssi 属性
+     * @throws WiFi 未初始化
+     * @throws 获取客户端列表失败
      */
     JSValue WiFi::allSta(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -1111,11 +1238,11 @@ namespace be {
 
     /**
      * 扫描周围的 WiFi 热点，必须在 STA 模式下运行
-     * 
-     * 异步返回 Promise\<object[]\> 
-     * 
+     *
+     * 异步返回 Promise\<object[]\>
+     *
      * 返回对象数组的格式：
-     * 
+     *
      * ```javascript
      * [
      *     {
@@ -1128,17 +1255,31 @@ namespace be {
      *     ...
      * ]
      * ```
-     * 
+     *
+     * 示例：
+     * ```javascript
+     * import { scan } from "wifi"
+     *
+     * const aps = await scan()
+     * aps.forEach(ap => {
+     *     console.log(ap.ssid, ap.rssi, "dBm")
+     * })
+     * ```
+     *
+     * @module wifi
      * @function scan
      * @return Promise\<object[]\>
      */
 
     /**
-     * 开始扫描附近的AP
-     * 
-     * > wifi STA 模式必须启动
-     * 
-     * @return bool
+     * 开始扫描附近的 AP
+     *
+     * WiFi STA 模式必须已启动。
+     *
+     * @module wifi
+     * @function scanStart
+     * @return boolean 返回 true 表示开始扫描成功，false 表示失败
+     * @throws WiFi 未初始化
      */
     JSValue WiFi::scanStart(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -1162,10 +1303,12 @@ namespace be {
     }
 
     /**
-     * 停止AP扫描
-     * 
+     * 停止 AP 扫描
+     *
+     * @module wifi
      * @function scanStop
-     * @return bool
+     * @return boolean 返回 true 表示停止成功，false 表示失败
+     * @throws WiFi 未初始化
      */
     JSValue WiFi::scanStop(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -1174,9 +1317,11 @@ namespace be {
     
     /**
      * 返回 AP 扫描是否正在进行
-     * 
+     *
+     * @module wifi
      * @function isScanning
-     * @return bool
+     * @return boolean 返回 true 表示正在扫描中，false 表示未扫描
+     * @throws WiFi 未初始化
      */
     JSValue WiFi::isScanning(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -1215,22 +1360,25 @@ namespace be {
 
     /**
      * 取回 AP 扫描的结果
-     * 
-     * 返回的数组格式:
+     *
+     * 返回的数组格式：
      * ```javascript
      * [
      *     {
-     *         bssid:string ,
-     *          ssid:string ,
-     *          channel:number ,
-     *          rssi:number ,
-     *          authmode:number ,
-     *      }
+     *         bssid: string,
+     *         ssid: string,
+     *         channel: number,
+     *         rssi: number,
+     *         authmode: number,
+     *     }
      * ]
      * ```
-     * 
+     *
+     * @module wifi
      * @function scanRecords
-     * @return object[]
+     * @return object[] AP 列表
+     * @throws WiFi 未初始化
+     * @throws 内存分配失败
      */
     JSValue WiFi::scanRecords(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_WIFI_INITED
@@ -1267,10 +1415,11 @@ namespace be {
     }
 
     /**
-     * 返回 WiFi STA 模式是否启动
-     * 
+     * 返回 WiFi STA 模式是否已启动
+     *
+     * @module wifi
      * @function staStarted
-     * @return bool
+     * @return boolean 返回 true 表示 STA 已启动，false 表示未启动
      */
     JSValue WiFi::staStarted(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         if(!wifi_inited)
@@ -1278,10 +1427,11 @@ namespace be {
         return JS_NewBool(ctx, _sta_started) ;
     }
     /**
-     * 返回 WiFi STA 是否已经连接
-     * 
+     * 返回 WiFi STA 是否已经连接到 AP
+     *
+     * @module wifi
      * @function staConnected
-     * @return bool
+     * @return boolean 返回 true 表示已连接，false 表示未连接
      */
     JSValue WiFi::staConnected(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         if(!wifi_inited)
@@ -1289,10 +1439,11 @@ namespace be {
         return JS_NewBool(ctx, _sta_connected) ;
     }
     /**
-     * 返回 WiFi AP 模式是否启用
-     * 
+     * 返回 WiFi AP 模式是否已启用
+     *
+     * @module wifi
      * @function apStarted
-     * @return bool
+     * @return boolean 返回 true 表示 AP 已启用，false 表示未启用
      */
     JSValue WiFi::apStarted(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         if(!wifi_inited)
@@ -1300,6 +1451,22 @@ namespace be {
         return JS_NewBool(ctx, _ap_started) ;
     }
 
+    /**
+     * 设置 WiFi 接口的 MAC 地址
+     *
+     * 必须在 WiFi 启动前设置 MAC 地址。
+     *
+     * @module wifi
+     * @function setMAC
+     * @param ifname:string 接口名称，可选值为 "sta"、"ap"、"nan"
+     * @param mac:string MAC 地址，格式为 "xx:xx:xx:xx:xx:xx"
+     * @return undefined
+     * @throws WiFi 已启动，无法设置 MAC 地址
+     * @throws 参数数量不足
+     * @throws 接口名称无效
+     * @throws MAC 地址格式错误
+     * @throws 设置 MAC 地址失败
+     */
     JSValue WiFi::setMAC(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         if(_started) {
             JSTHROW("WiFi is already started, cannot set MAC address")
@@ -1343,6 +1510,17 @@ namespace be {
 
         return JS_UNDEFINED ;
     }
+    /**
+     * 获取 WiFi 接口的 MAC 地址
+     *
+     * @module wifi
+     * @function getMAC
+     * @param ifname:string 接口名称，可选值为 "sta"、"ap"、"nan"
+     * @return string MAC 地址，格式为 "xx:xx:xx:xx:xx:xx" (字母小写)
+     * @throws 参数数量不足
+     * @throws 接口名称无效
+     * @throws 获取 MAC 地址失败
+     */
     JSValue WiFi::getMAC(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
         CHECK_ARGC(1)
         std::string ARGV_TO_STRING(0, ifname)
@@ -1374,3 +1552,274 @@ namespace be {
 
     }
 }
+
+// ============================================================================
+// 以下函数在 js/wifi.js 中实现，通过 exportValue 导出到 WiFi 模块
+// ============================================================================
+
+/**
+ * 返回 WiFi 是否已准备好
+ * 
+ * 检查 WiFi 是否已经启动并处于可用状态。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as wifi from "wifi"
+ * 
+ * if (wifi.isReady()) {
+ *     console.log("WiFi is ready")
+ * }
+ * ```
+ *
+ * @module wifi
+ * @function isReady
+ * @return boolean 返回 true 表示 WiFi 已准备好，false 表示未准备好
+ */
+
+/**
+ * 启动 WiFi
+ * 
+ * 异步启动 WiFi 硬件，返回 Promise。
+ * `startAP` 和 `connect` 会自动调用此函数。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as wifi from "wifi"
+ * 
+ * await wifi.start()
+ * console.log("WiFi started!")
+ * ```
+ *
+ * @module wifi
+ * @function start
+ * @return Promise\<undefined\>
+ */
+
+/**
+ * 停止 WiFi
+ * 
+ * 异步停止 WiFi 硬件，返回 Promise。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as wifi from "wifi"
+ * 
+ * await wifi.stop()
+ * console.log("WiFi stopped!")
+ * ```
+ *
+ * @module wifi
+ * @function stop
+ * @return Promise\<undefined\>
+ */
+
+/**
+ * 连接到 WiFi 热点
+ * 
+ * 作为 STA 模式连接到指定的 WiFi 热点。
+ * 如果 retry 为负数，则会启动守护进程自动重连。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as wifi from "wifi"
+ * 
+ * // 基本连接
+ * const connected = await wifi.connect("MyWiFi", "password123")
+ * if (connected) {
+ *     console.log("Connected!")
+ * }
+ * 
+ * // 使用配置对象
+ * await wifi.connect({
+ *     ssid: "MyWiFi",
+ *     password: "password123",
+ *     retry: 3,
+ *     retryDur: 5000
+ * })
+ * 
+ * // 启动守护进程（retry < 0）
+ * await wifi.connect("MyWiFi", "password123", -1)
+ * ```
+ *
+ * @module wifi
+ * @function connect
+ * @param ssid:string|object WiFi 热点名称或配置对象
+ * @param password:string WiFi 热点密码（当 ssid 为字符串时）
+ * @param retry:number=3 连接失败重试次数，负数表示启动守护进程
+ * @param retryDur:number=5000 连接重试间隔时间，单位毫秒
+ * @return Promise\<boolean\> 返回 true 表示连接成功，false 表示失败
+ */
+
+/**
+ * 断开 WiFi 连接
+ * 
+ * 断开 STA 模式的 WiFi 连接，并停止守护进程（如果正在运行）。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as wifi from "wifi"
+ * 
+ * await wifi.disconnect()
+ * console.log("Disconnected!")
+ * ```
+ *
+ * @module wifi
+ * @function disconnect
+ * @param dontStopDeamon:boolean=false 如果为 true，则不停止守护进程
+ * @return Promise\<undefined\>
+ */
+
+/**
+ * 返回是否正在连接中
+ * 
+ * @module wifi
+ * @function isConnecting
+ * @return boolean 返回 true 表示正在连接中，false 表示未连接
+ */
+
+/**
+ * 启动 WiFi 热点（AP 模式）
+ * 
+ * 启动一个 WiFi 热点，供其他设备连接。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as wifi from "wifi"
+ * 
+ * const started = await wifi.startAP("MyAP", "password123")
+ * if (started) {
+ *     console.log("AP started!")
+ * }
+ * ```
+ *
+ * @module wifi
+ * @function startAP
+ * @param ssid:string 热点名称
+ * @param password:string 热点密码
+ * @return Promise\<boolean\> 返回 true 表示启动成功，false 表示失败
+ */
+
+/**
+ * 停止 WiFi 热点
+ * 
+ * 停止 AP 模式的 WiFi 热点。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as wifi from "wifi"
+ * 
+ * const stopped = await wifi.stopAP()
+ * if (stopped) {
+ *     console.log("AP stopped!")
+ * }
+ * ```
+ *
+ * @module wifi
+ * @function stopAP
+ * @return Promise\<boolean\> 返回 true 表示停止成功，false 表示失败
+ */
+
+/**
+ * 返回 WiFi 状态
+ * 
+ * 返回 AP 和/或 STA 的详细状态信息。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as wifi from "wifi"
+ * 
+ * // 获取所有状态
+ * const status = wifi.status()
+ * console.log(status.sta)
+ * console.log(status.ap)
+ * 
+ * // 仅获取 STA 状态
+ * const staStatus = wifi.status("sta")
+ * console.log(staStatus.ip)
+ * ```
+ *
+ * @module wifi
+ * @function status
+ * @param netif:string="apsta" 网络接口类型，可选值为 "apsta"、"sta"、"ap"
+ * @return object 状态对象
+ */
+
+/**
+ * 启动 STA 守护进程
+ * 
+ * 当 WiFi 连接断开时，守护进程会自动尝试重新连接。
+ * 通常在 `connect()` 函数中设置 retry 为负数时会自动启动守护进程。
+ * 
+ * @module wifi
+ * @function startStaDeamon
+ * @param dur:number=10000 检查间隔时间，单位毫秒，默认 10000ms
+ */
+
+/**
+ * 停止 STA 守护进程
+ * 
+ * 停止自动重连功能。`disconnect()` 函数会自动调用此函数。
+ * 
+ * @module wifi
+ * @function stopStaDeamon
+ */
+
+/**
+ * 返回 STA 守护进程是否正在运行
+ * 
+ * @module wifi
+ * @function isStaDeamonRunning
+ * @return boolean 返回 true 表示守护进程正在运行，false 表示未运行
+ */
+
+/**
+ * 扫描周围的 WiFi 热点
+ * 
+ * 扫描并返回周围可用的 WiFi 热点列表。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as wifi from "wifi"
+ * 
+ * const aps = await wifi.scan()
+ * aps.forEach(ap => {
+ *     console.log(ap.ssid, ap.rssi, "dBm")
+ * })
+ * ```
+ *
+ * @module wifi
+ * @function scan
+ * @return Promise\<object[]\> AP 列表，每个对象包含 ssid、rssi、authmode 等属性
+ */
+
+/**
+ * 等待获取 IP 地址
+ * 
+ * 等待分配 IP 地址，返回包含 IP 信息的状态对象，对象格式参考 `wifi.status("apsta")`
+ * 
+ * 如果连接断开，返回 false。
+ * 
+ * 如果已经获得IP，则直接返回，不需要等待。
+ * 
+ * > 连接到 WiFi 以后，还需要分配一个 IP 地址才能通讯。通常在 `await connect()` 之后 `await waitIP()`。
+ * 
+ * 示例：
+ * ```javascript
+ * import * as wifi from "wifi"
+ * 
+ * await wifi.connect("MyWiFi", "password123")
+ * const ipInfo = await wifi.waitIP()
+ * if (ipInfo) {
+ *     console.log("IP:", ipInfo.ip)
+ * }
+ * 
+ * // @todo 
+ * // 现在可以请求服务器了
+ * // ... ...
+ * 
+ * ```
+ *
+ * @module wifi
+ * @function waitIP
+ * @return Promise\<object|false\> 成功返回状态对象，失败返回 false
+ */

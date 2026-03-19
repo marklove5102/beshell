@@ -29,7 +29,7 @@ namespace be {
      * 
      * 模块 [serial](overview.md) 创建了和硬件对应的 I2C 实例，`import serial` 即可。
      * 
-     * @module [serial](../serial)
+     * @module serial
      * @class I2C
      */
     class I2C: public be::NativeClass {
