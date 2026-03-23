@@ -219,7 +219,8 @@ namespace be{
      * 
      * 计算指定范围内所有字节的累加和，用于数据完整性验证。
      * 
-     * 示例：
+     * #### 使用示例
+     * 
      * ```javascript
      * import * as flash from "flash"
      * 
@@ -250,13 +251,56 @@ namespace be{
      * // 计算整个分区的校验和（注意内存和性能）
      * // const totalSum = fs.checksum(fs.size, 0)
      * ```
-     *
+     * 
+     * #### CheckSum 算法说明
+     * 
+     * 校验和采用**简单字节累加算法**，具体步骤如下：
+     * 
+     * 1. 从指定的 `offset` 偏移位置开始读取数据
+     * 2. 逐个将每个字节的值（0-255）累加到一个 32 位无符号整数中
+     * 3. 累加范围为 `[offset, offset + length)`，共 `length` 个字节
+     * 4. 返回最终的累加和（32 位无符号整数，范围 0 到 4294967295）
+     * 
+     * 数学表达式：
+     * $$
+     * checksum = \sum_{i=offset}^{offset + length - 1} data[i]
+     * $$
+     * 
+     * #### CheckSum JavaScript 等效实现
+     * 
+     * 以下是等效的 JavaScript 实现代码，可用于在 PC 端计算固件文件的校验和：
+     * 
+     * ```javascript
+     * //计算 ArrayBuffer 的校验和（与 Partition.checksum() 算法一致）
+     * function calculateChecksum(buffer, length, offset = 0) {
+     *     const view = new Uint8Array(buffer, offset, length)
+     *     let checksum = 0
+     *     for (let i = 0; i < view.length; i++) {
+     *         checksum += view[i]
+     *     }
+     *     // 确保返回 32 位无符号整数
+     *     return checksum >>> 0
+     * }
+     * 
+     * // 使用示例：计算文件校验和
+     * // 在 Node.js 中：
+     * const fs = require('fs')
+     * const data = fs.readFileSync('firmware.bin')
+     * const checksum = calculateChecksum(data.buffer, data.length)
+     * console.log('Checksum: 0x' + checksum.toString(16).toUpperCase())
+     * 
+     * // 在浏览器中：
+     * // const response = await fetch('firmware.bin')
+     * // const buffer = await response.arrayBuffer()
+     * // const checksum = calculateChecksum(buffer, buffer.byteLength)
+     * ```
+     * 
      * @module flash
      * @class Partition
      * @function checksum
-     * @param length:number 计算长度
-     * @param offset:number=0 起始偏移量
-     * @return number 校验和值
+     * @param length:number 计算长度（字节数）
+     * @param offset:number=0 起始偏移量（字节）
+     * @return number 32 位无符号整数校验和（范围 0 到 4294967295）
      * @throws 超出分区范围
      * @throws 内存分配失败
      * @throws 读取失败
@@ -312,7 +356,7 @@ namespace be{
      * @class Partition
      * @property label
      * @readonly
-     * @return string 分区标签
+     * @return string
      */
     JSValue Partition::label(JSContext *ctx, JSValueConst this_val) {
         THIS_NCLASS(Partition, self)
@@ -322,11 +366,13 @@ namespace be{
     /**
      * 获取分区类型
      * 
+     * 分区类型，可能值为 "app"、"data"、"bootloader"、"partition_table" 或 "UNKNOWN"
+     * 
      * @module flash
      * @class Partition
      * @property type
      * @readonly
-     * @return string 分区类型，可能值为 "app"、"data"、"bootloader"、"partition_table" 或 "UNKNOWN"
+     * @return string
      */
     JSValue Partition::type(JSContext *ctx, JSValueConst this_val) {
         THIS_NCLASS(Partition, self)
@@ -348,7 +394,7 @@ namespace be{
      * @class Partition
      * @property subtype
      * @readonly
-     * @return number 子类型值
+     * @return number
      */
     JSValue Partition::subtype(JSContext *ctx, JSValueConst this_val) {
         THIS_NCLASS(Partition, self)
@@ -362,7 +408,7 @@ namespace be{
      * @class Partition
      * @property address
      * @readonly
-     * @return number 起始地址
+     * @return number
      */
     JSValue Partition::address(JSContext *ctx, JSValueConst this_val) {
         THIS_NCLASS(Partition, self)
@@ -370,13 +416,13 @@ namespace be{
     }
 
     /**
-     * 获取分区大小
+     * 获取分区大小（字节）
      * 
      * @module flash
      * @class Partition
      * @property size
      * @readonly
-     * @return number 分区大小（字节）
+     * @return number
      */
     JSValue Partition::size(JSContext *ctx, JSValueConst this_val) {
         THIS_NCLASS(Partition, self)
@@ -390,7 +436,7 @@ namespace be{
      * @class Partition
      * @property readonly
      * @readonly
-     * @return bool 是否只读
+     * @return bool
      */
     JSValue Partition::readonly(JSContext *ctx, JSValueConst this_val) {
         THIS_NCLASS(Partition, self)
@@ -404,7 +450,7 @@ namespace be{
      * @class Partition
      * @property encrypted
      * @readonly
-     * @return bool 是否加密
+     * @return bool
      */
     JSValue Partition::encrypted(JSContext *ctx, JSValueConst this_val) {
         THIS_NCLASS(Partition, self)
